@@ -94,7 +94,7 @@ var app = new Vue({
     },
     single2: {
       handler: function(newVal, oldVal){
-      Plotly.newPlot('singlePlot', [this.single1, this.signle2], layout);
+      Plotly.newPlot('singlePlot', [this.single1, this.single2], layout);
       },
     deep: true,
     immediate: false
