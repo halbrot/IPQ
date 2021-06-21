@@ -28,10 +28,18 @@ var layout2 = {
   // yaxis: {
   //   range: [0, 8]
   // },
-  title:'IPQ',
+  title: 'single graph',
+  yaxis: {title: 'temperature'},
+  yaxis2: {
+    title: 'MV',
+    overlaying: 'y',
+    side: 'right'
+  },
   height: 500,
   width: 800
 };
+
+
 
 //   data = [trace1, trace2]
 
@@ -71,6 +79,14 @@ var app = new Vue({
       mode: 'lines',
       type: 'scatter',
       marker: { size: 6 }
+    },
+    single3: {
+      x: null,
+      y: null,
+      yaxis: 'y2',
+      mode: 'lines',
+      type: 'scatter',
+      marker: { size: 6 }
     }
   },
   methods: {
@@ -90,7 +106,9 @@ var app = new Vue({
           .then(response => (this.single1.x = parseFloat(response.data.time),
                             this.single1.y = response.data.data1,
                             this.single2.y = response.data.data2,
-                            this.single2.x = this.single1.x));
+                            this.single2.x = this.single1.x,
+                            this.single3.x = this.single1.x,
+                            this.single3.y = response.data.mv));
       }
   },
 
@@ -106,7 +124,7 @@ var app = new Vue({
     },
     single2: {
       handler: function(newVal, oldVal){
-      Plotly.newPlot('singlePlot', [this.single1, this.single2], layout2);
+      Plotly.newPlot('singlePlot', [this.single1, this.single2, this.single3], layout2);
       },
     deep: true,
     immediate: false
@@ -114,6 +132,3 @@ var app = new Vue({
   }
 
 });
-
-
-
