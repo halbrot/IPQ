@@ -17,8 +17,20 @@ var layout = {
   //   range: [0, 8]
   // },
   title:'IPQ',
-  height: 600,
+  height: 500,
   width: 1000
+};
+
+var layout2 = {
+  // xaxis: {
+  //   range: [ 0.75, 5.25 ]
+  // },
+  // yaxis: {
+  //   range: [0, 8]
+  // },
+  title:'IPQ',
+  height: 500,
+  width: 800
 };
 
 //   data = [trace1, trace2]
@@ -49,14 +61,14 @@ var app = new Vue({
     single1: {
       x: null,
       y: null,
-      mode: 'markers',
+      mode: 'lines',
       type: 'scatter',
       marker: { size: 6 }
     },
     single2: {
       x: null,
       y: null,
-      mode: 'markers',
+      mode: 'lines',
       type: 'scatter',
       marker: { size: 6 }
     }
@@ -75,7 +87,7 @@ var app = new Vue({
       singleGraph: function(){
         axios
           .get(`http://10.112.120.156:5000/singleplot?id=${this.id}`)
-          .then(response => (this.single1.x = response.data.time,
+          .then(response => (this.single1.x = parseFloat(response.data.time),
                             this.single1.y = response.data.data1,
                             this.single2.y = response.data.data2,
                             this.single2.x = this.single1.x));
@@ -94,7 +106,7 @@ var app = new Vue({
     },
     single2: {
       handler: function(newVal, oldVal){
-      Plotly.newPlot('singlePlot', [this.single1, this.single2], layout);
+      Plotly.newPlot('singlePlot', [this.single1, this.single2], layout2);
       },
     deep: true,
     immediate: false
