@@ -22,9 +22,17 @@ def index():
 @app.route('/getdata', methods=['GET'])
 def getdata():
 
-    # b = float(request.args.get('b'))
 
-    path="Z:/01_研究テーマ/14_三重IH改善/07_冷却水温度測定/202106_GRT7101C0/"
+    # src = int(request.args.get('src'))
+
+    # if src==6:
+    #     path = 'Z:/01_研究テーマ/14_三重IH改善/06_周辺温度測定/202106_GRW5102B0/'
+    # elif src==7:
+    #     path = 'Z:/01_研究テーマ/14_三重IH改善/07_冷却水温度測定/202106_GRT7101C0/'
+
+    # path="Z:/01_研究テーマ/14_三重IH改善/07_冷却水温度測定/202106_GRT7101C0/"
+    path = str(request.args.get('path'))
+    print(path)
     df = d2sd.routine(path, "temperature")
 
     # 日時をstring のリストに変換
@@ -50,9 +58,10 @@ def getdata():
 @app.route('/singleplot', methods=['GET'])
 def singleplot():
 
+    path = str(request.args.get('path'))
     id = int(request.args.get('id'))
 
-    path="Z:/01_研究テーマ/14_三重IH改善/07_冷却水温度測定/202106_GRT7101C0/"
+    # path="Z:/01_研究テーマ/14_三重IH改善/07_冷却水温度測定/202106_GRT7101C0/"
     chara1list, chara2list, mv , time = d2sd.singlecurve(id, character="temperature")
 
 

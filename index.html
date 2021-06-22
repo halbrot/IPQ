@@ -17,8 +17,17 @@
 
   <body>
     <div id="app" class="container>">
-      <div class="d-grid gap-2 d-md-flex justify-content-md">
-        <button v-on:click="historyGraph()" name="button" class="btn btn-primary">history</button>
+      <div class="row">
+        <div class="col-3">
+          <select class="form-select" v-model="path">
+            <option v-for="option in options" v-bind:value="option.value">
+              {{option.text}}
+            </option>
+          </select>
+        </div>  
+        <!-- <div class="col-auto">
+          <button v-on:click="historyGraph()" name="button" class="btn btn-primary">history</button>
+        </div> -->
       </div>
     </div>
 
