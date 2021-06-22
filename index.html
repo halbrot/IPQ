@@ -18,12 +18,19 @@
   <body>
     <div id="app" class="container>">
       <div class="row">
-        <div class="col-3">
+        <div class="col-2">
           <select class="form-select" v-model="path">
             <option v-for="option in options" v-bind:value="option.value">
               {{option.text}}
             </option>
           </select>
+        </div>
+        <div class="col-1">
+            <div class="spinner-border" role="status" v-if="loading" >
+              <span class="visually-hidden" >Loading...</span>
+            </div>
+        </div>
+
         </div>  
         <!-- <div class="col-auto">
           <button v-on:click="historyGraph()" name="button" class="btn btn-primary">history</button>

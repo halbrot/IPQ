@@ -37,6 +37,7 @@ var app = new Vue({
       {text: '2021/6 GRW5102(B0)', value: 'Z:/01_研究テーマ/14_三重IH改善/06_周辺温度測定/202106_GRW5102B0/'},
       {text: '2021/6 GRT7101(C0)', value: 'Z:/01_研究テーマ/14_三重IH改善/07_冷却水温度測定/202106_GRT7101C0/'}
     ],
+    loading: false,
     trace1: {
       x: null,
       y: null,
@@ -112,6 +113,7 @@ var app = new Vue({
   watch: {
     path:{
       handler: function(){
+        this.loading = true;
         axios
           .get(`http://10.112.120.156:5000/getdata?path=${this.path}`)
           .then(response => {
@@ -121,6 +123,8 @@ var app = new Vue({
             this.trace2.x = this.trace1.x,
             this.trace1.text = response.data.id,
             this.trace2.text = this.trace1.text,
+
+            this.loading = false
   
             Plotly.newPlot('myDiv', [this.trace1, this.trace2], layout)
             this.myPlot.on("plotly_click", function(data){
