@@ -25,22 +25,23 @@ var layout2 = {
 var app = new Vue({
   el: '#app',
   data: {
+    myPlot: document.getElementById("myDiv"),
     id: null,
     trace1: {
-        x: null,
-        y: null,
-        text : null,
-        mode: 'markers',
-        type: 'scatter',
-        marker: { size: 6 }
+      x: null,
+      y: null,
+      text : null,
+      mode: 'markers',
+      type: 'scatter',
+      marker: { size: 6 }
     },
     trace2: {
-        x: null,
-        y: null,
-        text : null,
-        mode: 'markers',
-        type: 'scatter',
-        marker: { size: 6 }
+      x: null,
+      y: null,
+      text : null,
+      mode: 'markers',
+      type: 'scatter',
+      marker: { size: 6 }
     },
     single1: {
       x: null,
@@ -76,21 +77,45 @@ var app = new Vue({
           this.trace2.x = this.trace1.x,
           this.trace1.text = response.data.id,
           this.trace2.text = this.trace1.text,
+
           Plotly.newPlot('myDiv', [this.trace1, this.trace2], layout)
-        });
-    },
-    singleGraph: function(){
-      axios
-        .get(`http://10.112.120.156:5000/singleplot?id=${this.id}`)
-        .then(response => {
-          this.single1.x = parseFloat(response.data.time),
-          this.single1.y = response.data.data1,
-          this.single2.y = response.data.data2,
-          this.single2.x = this.single1.x,
-          this.single3.x = this.single1.x,
-          this.single3.y = response.data.mv,
-          Plotly.newPlot('singlePlot', [this.single1, this.single2, this.single3], layout2)
-        });
+          this.myPlot.on("plotly_click", function(data){
+            console.log(data.points[0].text);
+            app.id = parseInt(data.points[0].text);
+          });
+        })
+    }
+    // singleGraph: function(){
+    //   axios
+    //     .get(`http://10.112.120.156:5000/singleplot?id=${this.id}`)
+    //     .then(response => {
+    //       this.single1.x = parseFloat(response.data.time),
+    //       this.single1.y = response.data.data1,
+    //       this.single2.y = response.data.data2,
+    //       this.single2.x = this.single1.x,
+    //       this.single3.x = this.single1.x,
+    //       this.single3.y = response.data.mv,
+    //       Plotly.newPlot('singlePlot', [this.single1, this.single2, this.single3], layout2)
+    //     });
+    // }
+  },
+  watch: {
+    id:{
+      handler: function(){
+        axios
+          .get(`http://10.112.120.156:5000/singleplot?id=${this.id}`)
+          .then(response => {
+            this.single1.x = parseFloat(response.data.time),
+            this.single1.y = response.data.data1,
+            this.single2.y = response.data.data2,
+            this.single2.x = this.single1.x,
+            this.single3.x = this.single1.x,
+            this.single3.y = response.data.mv,
+            Plotly.newPlot('singlePlot', [this.single1, this.single2, this.single3], layout2)
+          });
+      }
     }
   }
+
 });
+
