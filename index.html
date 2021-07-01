@@ -26,20 +26,30 @@
           </select>
         </div>
         <div class="col-1">
-            <div class="spinner-border" role="status" v-if="loading" >
-              <span class="visually-hidden" >Loading...</span>
-            </div>
+          <div class="spinner-border text-primary" role="status" v-if="loading" >
+            <span class="visually-hidden" >Loading...</span>
+          </div>
         </div>
-
-        </div>  
+        <div class="col-2">
+          <button v-on:click="dorefresh" name="button" class="btn btn-primary">データ更新</button>
+        </div>
+      </div>
+    </div>  
         <!-- <div class="col-auto">
           <button v-on:click="historyGraph()" name="button" class="btn btn-primary">history</button>
         </div> -->
+
+    <div class="row">
+      <div class="col-6">
+        <div id="myDiv"><!-- ここにグラフを表示する --></div>
+      </div>
+      <div class="col-6">
+        <div id="singlePlot"><!-- ここにグラフを表示する --></div>
+        </div>
       </div>
     </div>
 
-      <div id="myDiv"><!-- ここにグラフを表示する --></div>
-      <div id="singlePlot"><!-- ここにグラフを表示する --></div>
+      
 
 
 

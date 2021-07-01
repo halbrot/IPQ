@@ -41,7 +41,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import datetime
-import concat_csv
+import preprocess
 import os
 
 start_end_index = []
@@ -49,39 +49,9 @@ start_end_index = []
 workdir = "Z:/01_研究テーマ/14_三重IH改善/07_冷却水温度測定/202106_GRT7101C0/"
 concatfile = workdir + "concat.csv"
 
-
-def divided2single(refresh=False):
-    """
-    concat.csv は複数回の加熱が適当なインターバルをはさんで繰り返されるデータなので，
-    個々の加熱データにわける必要がある．
-    加熱開始インデックスと加熱終了インデックスの2要素からなる配列の2次元配列を返す．
-    一度計算したらstartend.npy に保存して，次からは再利用する．
-    再計算したい場合は引数にTrueを指定する．
-    """
-
-    # グローバル変数であることを宣言
+def read_startend():
     global start_end_index
-
-    if (not refresh and os.path.exists(workdir + "startend.npy")):
-        start_end_index = np.load(workdir + "startend.npy").tolist()
-    else:
-        df = pd.read_csv(concatfile, index_col=0)
-        frequency = df["IHヒータ周波数"]
-        # 加熱していないときの周波数は1となっている．
-        # 念のために 5を超える場合は加熱中，5未満では非加熱中とした．
-        is_heat = False
-        for i in range(frequency.size):
-            if not is_heat:
-                if frequency[i] > 5:
-                    start_index = i;
-                    is_heat = True
-            if is_heat:
-                if frequency[i] <= 5:
-                    end_index = i;
-                    is_heat = False
-                    start_end_index.append([start_index, end_index - 1])
-        arr = np.array(start_end_index)
-        np.save(workdir + "startend", arr)
+    start_end_index = np.load(workdir + "startend.npy").tolist()
 
 
 def create_ax(tate=1, yoko=1, tatemm=127, yokomm=170):
@@ -99,7 +69,7 @@ def create_ax(tate=1, yoko=1, tatemm=127, yokomm=170):
 
 
 def singlecurve(graph_index, character="temperature"):
-    divided2single(refresh=False)
+    read_startend()
     df = pd.read_csv(concatfile, index_col=0)
 
     if character == "temperature":
@@ -112,17 +82,22 @@ def singlecurve(graph_index, character="temperature"):
     # numpyarrayに変換
     # series のままだとMatplotlib でplot した時に X軸の値にインデックス値を使われてしまう．
     i = graph_index
+    #サンプリングレートを検出 (1 s 以下にのみ対応)
+    samplingrate = (df["ms"][start_end_index[i][0]+1]-df["ms"][start_end_index[i][0]])/1000
+    if samplingrate == 0:
+        samplingrate = 1
+
     chara1list = df[chara1].values[start_end_index[i][0]:start_end_index[i][1] + 1].tolist()
     chara2list = df[chara2].values[start_end_index[i][0]:start_end_index[i][1] + 1].tolist()
     mv = df["電圧出力"].values[start_end_index[i][0]:start_end_index[i][1] + 1].tolist()
-    time = list(range(len(chara1list)))
+    time = np.arange(0, len(chara1list)*samplingrate, samplingrate).tolist()
 
-    return chara1list, chara2list, mv , time
+    return chara1list, chara2list, mv, time
 
 
 def curves(graph_index):
     # 引数なしの場合，すべてをプロットする．
-    divided2single()
+    read_startend()
     df = pd.read_csv(concatfile, index_col=0)
     # numpyarrayに変換
     # series のままだとMatplotlib でplot した時に X軸の値にインデックス値を使われてしまう．
@@ -233,7 +208,7 @@ def histplot_datetime(startdatetime, enddatetime, character, ax, **kwargs):
     yrange_amb = check_key("yrange_amb")
     col_names = check_key("col_names")
 
-    divided2single()
+    read_startend()
     df = collect_characteristic_data(character)
 
     # DataFrameからプロットに使う範囲のデータだけを抽出する
@@ -328,7 +303,7 @@ def days_history(year, month, firstday, days=1, character="carbide", **kwargs):
 
 
 def all_hist(character="carbide"):
-    divided2single(refresh=False)
+    read_startend()
     df = collect_characteristic_data(character)  # プロット期間を指定するために必要
     fig, ax = create_ax(1, 1, tatemm=50, yokomm=300)
     annotate_index = range(0, len(start_end_index) + 1, 100)
@@ -382,11 +357,14 @@ def set_workdir(path):
     concatfile = workdir + "concat.csv"
 
 
-def routine(path, character):
-    # 初期の連結処理，すでにconcat.csv があり，不要な列を落として列数21の場合はなにもしない
+def routine(path, character, refresh=False):
+    import os
     set_workdir(path)
-    concat_csv.usualprocess(path)
-    divided2single(refresh=False)
+    if not os.path.exists(concatfile):
+        preprocess.initprocess(path)
+    if refresh:
+        preprocess.initprocess(path)
+    read_startend()
     df = collect_characteristic_data(character)
     return df
 
@@ -394,5 +372,10 @@ def routine(path, character):
 if __name__ == "__main__":
     # singlecurve(12, "temperature", save=True)
     path = "Z:/01_研究テーマ/14_三重IH改善/07_冷却水温度測定/202106_GRT7101C0/"
-    routine(path)
+    set_workdir(path)
+    preprocess.initprocess(path)
+    read_startend()
+    df = pd.read_csv(concatfile, index_col=0)
+    print(df["ms"].iloc[1]-df["ms"].iloc[0])
+    # routine(path)
 
