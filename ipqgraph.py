@@ -41,17 +41,9 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import datetime
-import preprocess
+from preprocess import preprocess
 import os
 
-
-
-workdir = "Z:/01_研究テーマ/14_三重IH改善/07_冷却水温度測定/202106_GRT7101C0/"
-concatfile = workdir + "concat.csv"
-
-def read_startend():
-    global start_end_index
-    start_end_index = np.load(workdir + "startend.npy").tolist()
 
 
 def create_ax(tate=1, yoko=1, tatemm=127, yokomm=170):
@@ -70,7 +62,7 @@ def create_ax(tate=1, yoko=1, tatemm=127, yokomm=170):
 
 def singlecurve(path, graph_index, character="temperature"):
     
-    df, start_end_index = preprocess.getdata(path)
+    df, start_end_index = preprocess(path).getdata()
 
     if character == "temperature":
         chara1 = "ワーク外側温度"
@@ -97,7 +89,7 @@ def singlecurve(path, graph_index, character="temperature"):
 
 def curves(path, graph_index):
 
-    df, start_end_index = preprocess.getdata(path)
+    df, start_end_index = preprocess(path).getdata()
 
     # numpyarrayに変換
     # series のままだとMatplotlib でplot した時に X軸の値にインデックス値を使われてしまう．
@@ -143,7 +135,7 @@ def get_characteristic_data(path, character, refresh=False):
                tempdiff → ワーク外側最高温度 - ワーク内側最高温度
     """
 
-    df, start_end_index = preprocess.getdata(path, refresh)
+    df, start_end_index = preprocess(path).getdata(refresh)
 
     # 日時をdatetime型に変換
     df["日時"] = pd.to_datetime(df["日時"])
@@ -210,7 +202,6 @@ def histplot_datetime(startdatetime, enddatetime, character, ax, **kwargs):
     yrange_amb = check_key("yrange_amb")
     col_names = check_key("col_names")
 
-    read_startend()
     df = get_characteristic_data(character)
 
     # DataFrameからプロットに使う範囲のデータだけを抽出する
@@ -305,7 +296,7 @@ def days_history(year, month, firstday, days=1, character="carbide", **kwargs):
 
 
 def all_hist(character="carbide"):
-    read_startend()
+    df, start_end_index = preprocess(path).getdata()
     df = get_characteristic_data(character)  # プロット期間を指定するために必要
     fig, ax = create_ax(1, 1, tatemm=50, yokomm=300)
     annotate_index = range(0, len(start_end_index) + 1, 100)
@@ -354,9 +345,7 @@ def amb_temps():
 
 
 if __name__ == "__main__":
-    # singlecurve(12, "temperature", save=True)
     path = "Z:/01_研究テーマ/14_三重IH改善/07_冷却水温度測定/202106_GRT7101C0/"
-    df, start_end_index = preprocess.getdata(path)
-    print(df["ms"].iloc[1]-df["ms"].iloc[0])
-    # routine(path)
+
+
 

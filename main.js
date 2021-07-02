@@ -22,7 +22,12 @@ var layout2 = {
   // width: 600
 };
 
-var config = {responsive: true}
+var config = {
+  responsive: true,
+  scrollZoom: true,
+  autosizable: true,
+  }
+
 
 var app = new Vue({
   el: '#app',
@@ -38,7 +43,8 @@ var app = new Vue({
       {text: '2021/4 GRW5102(B0)', value: 'Z:/01_研究テーマ/14_三重IH改善/05_量産時日光の影響/生データ/202104/'},
       {text: '2021/5 GRW5102(B0)', value: 'Z:/01_研究テーマ/14_三重IH改善/06_周辺温度測定/202106_GRW5102B0/'},
       {text: '2021/6 GRT7101(C0)', value: 'Z:/01_研究テーマ/14_三重IH改善/07_冷却水温度測定/202106_GRT7101C0/'},
-      {text: '2021/6 GRW5102(C0)', value: 'Z:/01_研究テーマ/14_三重IH改善/08_生産チャート/202106_GRW5102C0/'}
+      {text: '2021/6 GRW5102(C0)', value: 'Z:/01_研究テーマ/14_三重IH改善/08_生産チャート/202106_GRW5102C0/'},
+      {text: '2021/6 GRW5102(B0)', value: 'Z:/01_研究テーマ/14_三重IH改善/08_生産チャート/202106_GRW5102B0/'}
 
     ],
     loading: false,
