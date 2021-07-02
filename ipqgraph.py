@@ -44,8 +44,8 @@ import datetime
 import preprocess
 import os
 
-start_end_index = []
-# workdir = "生データ/202104/"
+
+
 workdir = "Z:/01_研究テーマ/14_三重IH改善/07_冷却水温度測定/202106_GRT7101C0/"
 concatfile = workdir + "concat.csv"
 
@@ -68,9 +68,9 @@ def create_ax(tate=1, yoko=1, tatemm=127, yokomm=170):
     return fig, ax
 
 
-def singlecurve(graph_index, character="temperature"):
-    read_startend()
-    df = pd.read_csv(concatfile, index_col=0)
+def singlecurve(path, graph_index, character="temperature"):
+    
+    df, start_end_index = preprocess.getdata(path)
 
     if character == "temperature":
         chara1 = "ワーク外側温度"
@@ -95,10 +95,10 @@ def singlecurve(graph_index, character="temperature"):
     return chara1list, chara2list, mv, time
 
 
-def curves(graph_index):
-    # 引数なしの場合，すべてをプロットする．
-    read_startend()
-    df = pd.read_csv(concatfile, index_col=0)
+def curves(path, graph_index):
+
+    df, start_end_index = preprocess.getdata(path)
+
     # numpyarrayに変換
     # series のままだとMatplotlib でplot した時に X軸の値にインデックス値を使われてしまう．
     outer_temperature = df["ワーク外側温度"].values
@@ -134,7 +134,7 @@ def curves(graph_index):
     plt.show()
 
 
-def collect_characteristic_data(character):
+def get_characteristic_data(path, character, refresh=False):
     """
     character: carbide → 炭化物面積率の最終値
                temperature → ワーク温度の"最大値"
@@ -142,7 +142,9 @@ def collect_characteristic_data(character):
                power → 開始，終了時電力
                tempdiff → ワーク外側最高温度 - ワーク内側最高温度
     """
-    df = pd.read_csv(workdir + "concat.csv", index_col=0)
+
+    df, start_end_index = preprocess.getdata(path, refresh)
+
     # 日時をdatetime型に変換
     df["日時"] = pd.to_datetime(df["日時"])
     datetime = []
@@ -171,7 +173,7 @@ def collect_characteristic_data(character):
             chara1list.append(df["IHヒータ出力電力値"][start_end_index[i][0] + 3])
             chara2list.append(df["IHヒータ出力電力値"][start_end_index[i][1] - 3])
 
-
+  
     # 異常値除去しやすいようにDataFrameにまとめる
     df2 = pd.DataFrame({"日時": datetime,
                         "特性値1": chara1list,
@@ -351,31 +353,10 @@ def amb_temps():
     return df
 
 
-def set_workdir(path):
-    global workdir, concatfile
-    workdir = path
-    concatfile = workdir + "concat.csv"
-
-
-def routine(path, character, refresh=False):
-    import os
-    set_workdir(path)
-    if not os.path.exists(concatfile):
-        preprocess.initprocess(path)
-    if refresh:
-        preprocess.initprocess(path)
-    read_startend()
-    df = collect_characteristic_data(character)
-    return df
-
-
 if __name__ == "__main__":
     # singlecurve(12, "temperature", save=True)
     path = "Z:/01_研究テーマ/14_三重IH改善/07_冷却水温度測定/202106_GRT7101C0/"
-    set_workdir(path)
-    preprocess.initprocess(path)
-    read_startend()
-    df = pd.read_csv(concatfile, index_col=0)
+    df, start_end_index = preprocess.getdata(path)
     print(df["ms"].iloc[1]-df["ms"].iloc[0])
     # routine(path)
 

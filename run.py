@@ -33,13 +33,13 @@ def getdata():
     # path="Z:/01_研究テーマ/14_三重IH改善/07_冷却水温度測定/202106_GRT7101C0/"
     path = str(request.args.get('path'))
     refresh = int(request.args.get('refresh'))
-    print(refresh)
+
     if refresh==1:
         refresh=True
     else:
         refresh=False
 
-    df = ipq.routine(path, "temperature", refresh)
+    df = ipq.get_characteristic_data(path, "temperature", refresh)
 
     # 日時をstring のリストに変換
     datetime_string = []
@@ -68,7 +68,7 @@ def singleplot():
     id = int(request.args.get('id'))
 
     # path="Z:/01_研究テーマ/14_三重IH改善/07_冷却水温度測定/202106_GRT7101C0/"
-    chara1list, chara2list, mv , time = ipq.singlecurve(id, character="temperature")
+    chara1list, chara2list, mv , time = ipq.singlecurve(path, id, character="temperature")
     print(time[0:5])
 
     response = {'time': time,
