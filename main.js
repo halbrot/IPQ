@@ -180,7 +180,6 @@ var app = new Vue({
             this.single2.x = this.single1.x,
             this.single3.x = this.single1.x,
             this.single3.y = response.data.mv,
-            console.log(response),
             // Plotly.newPlot('singlePlot', [this.single1, this.single2, this.single3], layout2)
             
             Plotly.newPlot('singlePlot', [this.single1, this.single2], layout2, config)

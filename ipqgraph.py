@@ -211,7 +211,7 @@ def histplot_datetime(startdatetime, enddatetime, character, ax, **kwargs):
     col_names = check_key("col_names")
 
     read_startend()
-    df = collect_characteristic_data(character)
+    df = get_characteristic_data(character)
 
     # DataFrameからプロットに使う範囲のデータだけを抽出する
     # こうすると，適切な上下限範囲でプロットされる
@@ -306,7 +306,7 @@ def days_history(year, month, firstday, days=1, character="carbide", **kwargs):
 
 def all_hist(character="carbide"):
     read_startend()
-    df = collect_characteristic_data(character)  # プロット期間を指定するために必要
+    df = get_characteristic_data(character)  # プロット期間を指定するために必要
     fig, ax = create_ax(1, 1, tatemm=50, yokomm=300)
     annotate_index = range(0, len(start_end_index) + 1, 100)
     histplot_datetime(df["日時"].iloc[0], df["日時"].iloc[-1], character, ax, **{"annotation_index": annotate_index})

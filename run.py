@@ -23,14 +23,6 @@ def index():
 def getdata():
 
 
-    # src = int(request.args.get('src'))
-
-    # if src==6:
-    #     path = 'Z:/01_研究テーマ/14_三重IH改善/06_周辺温度測定/202106_GRW5102B0/'
-    # elif src==7:
-    #     path = 'Z:/01_研究テーマ/14_三重IH改善/07_冷却水温度測定/202106_GRT7101C0/'
-
-    # path="Z:/01_研究テーマ/14_三重IH改善/07_冷却水温度測定/202106_GRT7101C0/"
     path = str(request.args.get('path'))
     refresh = int(request.args.get('refresh'))
 
