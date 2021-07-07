@@ -71,18 +71,17 @@ def singlecurve(path, graph_index, character="temperature"):
         chara1 = "炭化物面積率1"
         chara2 = "炭化物面積率2"
 
-    # numpyarrayに変換
-    # series のままだとMatplotlib でplot した時に X軸の値にインデックス値を使われてしまう．
     i = graph_index
-    #サンプリングレートを検出 (1 s 以下にのみ対応)
-    samplingrate = (df["ms"][start_end_index[i][0]+1]-df["ms"][start_end_index[i][0]])/1000
-    if samplingrate == 0:
-        samplingrate = 1
 
     chara1list = df[chara1].values[start_end_index[i][0]:start_end_index[i][1] + 1].tolist()
     chara2list = df[chara2].values[start_end_index[i][0]:start_end_index[i][1] + 1].tolist()
     mv = df["電圧出力"].values[start_end_index[i][0]:start_end_index[i][1] + 1].tolist()
-    time = np.arange(0, len(chara1list)*samplingrate, samplingrate).tolist()
+
+    # 加熱開始時間との差を取り，経過時間を計算
+    # 秒に変化し，最後にリスト化
+    time = df['日時'][start_end_index[i][0]:start_end_index[i][1] + 1] - df['日時'][start_end_index[i][0]]
+    time = time.dt.total_seconds()
+    time = time.tolist()
 
     return chara1list, chara2list, mv, time
 
@@ -137,8 +136,7 @@ def get_characteristic_data(path, character, refresh=False):
 
     df, start_end_index = preprocess(path).getdata(refresh)
 
-    # 日時をdatetime型に変換
-    df["日時"] = pd.to_datetime(df["日時"])
+    datanum = len(start_end_index)
     datetime = []
     chara1list = []
     chara2list = []
@@ -345,7 +343,8 @@ def amb_temps():
 
 
 if __name__ == "__main__":
-    path = "Z:/01_研究テーマ/14_三重IH改善/07_冷却水温度測定/202106_GRT7101C0/"
+    path = "Z:/01_研究テーマ/14_三重IH改善/08_生産チャート/202106_GRW5102B0"
+    singlecurve(path, 2)
 
 
 

@@ -9,7 +9,6 @@ import os
 import numpy as np
 import pandas as pd
 
-
 class preprocess:
 
     def __init__(self, path):
@@ -49,7 +48,7 @@ class preprocess:
         if self.df.shape[1]!=21:
             return
         
-        self.df.columns = ["日時", "ms", "ワーク外側温度", "ワーク内側温度", "IHヒータ電圧値", "IHヒータ周波数",
+        self.df.columns = ["dtime", "ms", "ワーク外側温度", "ワーク内側温度", "IHヒータ電圧値", "IHヒータ周波数",
                     "IHヒータ出力電力値", "IHヒータ直流電圧値", "Channel1", "電圧出力", "材温熱電対1",
                     "材温熱電対2", "材温熱電対3", "Channel8", "材温熱電対4", "材温熱電対5", "炭化物面積率1",
                     "炭化物面積率2", "IHﾘﾌﾀｰｻｰﾎﾞ負荷率", "回転", "回転"]
@@ -66,12 +65,19 @@ class preprocess:
         drop_column_names = ["材温熱電対1", "材温熱電対2", "材温熱電対3", "Channel8", "材温熱電対4","材温熱電対5" ]
         self.df.drop(columns=drop_column_names, inplace=True)
 
+    def convertdatetime(self):
+        """
+        日時とmsを結合して datetimeに変換
+        """
+        self.df["日時"] = self.df["dtime"].astype(str).str.cat(self.df["ms"].astype(str).str.zfill(3), sep=".")
+        self.df["日時"] = pd.to_datetime(self.df["日時"])
+        self.df.drop(columns=["dtime", "ms"], inplace=True)
+
     def save_df(self):
         self.df.to_pickle(self.concatfile)
 
     def load_df(self):
         self.df = pd.read_pickle(self.concatfile)
-
 
     def divided2single(self):
         """
@@ -121,16 +127,18 @@ class preprocess:
             self.concat_csv()
             self.change_column_name()
             self.drop_unused_columns()
+            self.convertdatetime()
             self.save_df()
             self.divided2single()
         
         self.load_df()
         start_end_index = np.load(self.workdir + "startend.npy").tolist()
-
+        
         return self.df, start_end_index
 
 
 if __name__ == "__main__":
-    path = 'Z:/05_テーマ外仕事/202011_三重IH改善/06_周辺温度測定/202106_GRW5102B0/'
-    df, start_end_index = preprocess(path).getdata
-    print(start_end_index)
+    path = "Z:/01_研究テーマ/14_三重IH改善/08_生産チャート/202106_GRW5102B0"
+    df, start_end_index = preprocess(path).getdata(remake=True)
+    print((df["日時"][50]-df["日時"][2]).total_seconds())
+
