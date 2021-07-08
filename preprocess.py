@@ -139,6 +139,6 @@ class Preprocess:
 
 if __name__ == "__main__":
     path = "Z:/01_研究テーマ/14_三重IH改善/08_生産チャート/202106_GRW5102B0"
-    df, start_end_index = preprocess(path).getdata(remake=True)
+    df, start_end_index = Preprocess(path).getdata(remake=True)
     print((df["日時"][50]-df["日時"][2]).total_seconds())
 

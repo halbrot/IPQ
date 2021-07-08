@@ -6,7 +6,7 @@ import os
 import time
 
 # sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "calc"))
-import ipqgraph as ipq
+import edit_for_graph as efg
 
 from flask import Flask, render_template, Response,request,redirect,url_for, jsonify
 
@@ -31,7 +31,7 @@ def getdata():
     else:
         refresh=False
 
-    df = ipq.get_characteristic_data(path, "temperature", refresh)
+    df = efg.get_characteristic_data(path, "temperature", refresh)
 
     # 日時をstring のリストに変換
     datetime_string = []
@@ -60,7 +60,7 @@ def singleplot():
     id = int(request.args.get('id'))
 
     # path="Z:/01_研究テーマ/14_三重IH改善/07_冷却水温度測定/202106_GRT7101C0/"
-    chara1list, chara2list, mv , time = ipq.singlecurve(path, id, character="temperature")
+    chara1list, chara2list, mv , time = efg.singlecurve(path, id, character="temperature")
     print(time[0:5])
 
     response = {'time': time,

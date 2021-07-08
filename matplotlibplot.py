@@ -1,50 +1,7 @@
-# -*- coding: utf-8 -*-
-"""
-ver.1.05
-・divide2single_data.py から concat.csvを呼び出すように変更
-・yrange もkwardsに含めた．
-
-ver.1.04
-2021/6/4
-・桑名の気温をプロットする機能を拡張し，雰囲気温度等をプロットする標準的な仕様にした．
-　辞書型変数 ambient に データフレーム と プロットする列名，yrange を格納して
-  histplot_datetime にわたす．
-・ histplot_datetime 内でプロット前にプロットする範囲のデータだけを抽出するように変更
-　これにより適切な上下限でプロットされるようになった．
-要変更
-・ days_history で 2日以上をプロットする場合に上下限を自動的に決定し統一する機能
-
-
-ver.1.03
-2021/05/13
-下記関数に集約
-・ singlecurve(graph_index, character="temperature")
-・ curves (メンテナンスしていない)
-・ days_history(year, month, firstday, days = 1, character = "carbide", annotation = False, weather = False)
-・ all_hist(character = "carbide")
-
-divided2singleの結果を保存して再利用するように変更
-
-ver.1.02
-2021/05/12
-一日毎の炭化物面積率推移表示を追加
-
-2021/04/12
-sigletempを追加
-目標温度の横軸を自動決定
-MVのシフトを削除
-
-@author: ntn080465
-"""
-
-import numpy as np
-import pandas as pd
 import matplotlib.pyplot as plt
-import datetime
 from preprocess import Preprocess
-import os
-
-
+import edit_for_graph as efg
+import datetime
 
 def create_ax(tate=1, yoko=1, tatemm=127, yokomm=170):
     plt.rcParams['font.family'] = 'sans-serif'
@@ -58,33 +15,6 @@ def create_ax(tate=1, yoko=1, tatemm=127, yokomm=170):
     mm2inch = 1 / 25.4
     fig, ax = plt.subplots(tate, yoko, figsize=(yokomm * mm2inch * yoko, tatemm * mm2inch * tate), dpi=100)
     return fig, ax
-
-
-def singlecurve(path, graph_index, character="temperature"):
-    
-    df, start_end_index = Preprocess(path).getdata()
-
-    if character == "temperature":
-        chara1 = "ワーク外側温度"
-        chara2 = "ワーク内側温度"
-    elif character == "carbide":
-        chara1 = "炭化物面積率1"
-        chara2 = "炭化物面積率2"
-
-    i = graph_index
-
-    chara1list = df[chara1].values[start_end_index[i][0]:start_end_index[i][1] + 1].tolist()
-    chara2list = df[chara2].values[start_end_index[i][0]:start_end_index[i][1] + 1].tolist()
-    mv = df["電圧出力"].values[start_end_index[i][0]:start_end_index[i][1] + 1].tolist()
-
-    # 加熱開始時間との差を取り，経過時間を計算
-    # 秒に変化し，最後にリスト化
-    time = df['日時'][start_end_index[i][0]:start_end_index[i][1] + 1] - df['日時'][start_end_index[i][0]]
-    time = time.dt.total_seconds()
-    time = time.tolist()
-
-    return chara1list, chara2list, mv, time
-
 
 def curves(path, graph_index):
 
@@ -124,60 +54,6 @@ def curves(path, graph_index):
 
     plt.show()
 
-
-def get_characteristic_data(path, character, refresh=False):
-    """
-    character: carbide → 炭化物面積率の最終値
-               temperature → ワーク温度の"最大値"
-               frequency → 開始，終了時周波数
-               power → 開始，終了時電力
-               tempdiff → ワーク外側最高温度 - ワーク内側最高温度
-    """
-
-    df, start_end_index = preprocess(path).getdata(refresh)
-
-    datanum = len(start_end_index)
-    datetime = []
-    chara1list = []
-    chara2list = []
-
-    # 各ヒートでの特性値をリストに抽出
-    if character == "carbide":
-        for i in range(len(start_end_index)):
-            datetime.append(df["日時"][start_end_index[i][1]])
-            chara1list.append(df["炭化物面積率1"][start_end_index[i][1]])
-            chara2list.append(df["炭化物面積率2"][start_end_index[i][1]])
-    elif character == "temperature" or character == "tempdiff":
-        for i in range(len(start_end_index)):
-            datetime.append(df["日時"][start_end_index[i][1]])
-            chara1list.append(df["ワーク外側温度"].iloc[start_end_index[i][0]:start_end_index[i][1] + 1].max())
-            chara2list.append(df["ワーク内側温度"].iloc[start_end_index[i][0]:start_end_index[i][1] + 1].max())
-    elif character == "frequency":
-        for i in range(len(start_end_index)):
-            datetime.append(df["日時"][start_end_index[i][1]])
-            chara1list.append(df["IHヒータ周波数"][start_end_index[i][0] + 3])
-            chara2list.append(df["IHヒータ周波数"][start_end_index[i][1] - 3])
-    elif character == "power":
-        for i in range(len(start_end_index)):
-            datetime.append(df["日時"][start_end_index[i][1]])
-            chara1list.append(df["IHヒータ出力電力値"][start_end_index[i][0] + 3])
-            chara2list.append(df["IHヒータ出力電力値"][start_end_index[i][1] - 3])
-
-  
-    # 異常値除去しやすいようにDataFrameにまとめる
-    df2 = pd.DataFrame({"日時": datetime,
-                        "特性値1": chara1list,
-                        "特性値2": chara2list})
-
-    # tempdiffは1系列のデータしか必要ないが，この後のif文を少なくするために特性値1, 2両方に 同じデータを入れている．
-    # 両方ともプロットされるが，完全に重なるので見た目上問題ない．
-    if character == "tempdiff":
-        df2["特性値1"] = df2["特性値1"] - df2["特性値2"]
-        df2["特性値2"] = df2["特性値1"]
-
-    return df2
-
-
 def histplot_datetime(startdatetime, enddatetime, character, ax, **kwargs):
     """
     下記データを抽出してDataFrameで返す
@@ -200,7 +76,7 @@ def histplot_datetime(startdatetime, enddatetime, character, ax, **kwargs):
     yrange_amb = check_key("yrange_amb")
     col_names = check_key("col_names")
 
-    df = get_characteristic_data(character)
+    df = efg.get_characteristic_data(character)
 
     # DataFrameからプロットに使う範囲のデータだけを抽出する
     # こうすると，適切な上下限範囲でプロットされる
@@ -293,29 +169,12 @@ def days_history(year, month, firstday, days=1, character="carbide", **kwargs):
     plt.show()
 
 
-def all_hist(character="carbide"):
+def all_hist(path, character="carbide"):
     df, start_end_index = Preprocess(path).getdata()
-    df = get_characteristic_data(character)  # プロット期間を指定するために必要
+    df = efg.get_characteristic_data(character)  # プロット期間を指定するために必要
     fig, ax = create_ax(1, 1, tatemm=50, yokomm=300)
     annotate_index = range(0, len(start_end_index) + 1, 100)
     histplot_datetime(df["日時"].iloc[0], df["日時"].iloc[-1], character, ax, **{"annotation_index": annotate_index})
 
     plt.tight_layout()
     plt.show()
-
-
-def kuwana_weather():
-    df = pd.read_csv("kuwana_weather.csv", skiprows=5, usecols=(0, 1))
-    df.columns = ["日時", "気温"]
-    df["日時"] = pd.to_datetime(df["日時"])
-    # df = df.set_index("日時")
-    return df
-
-
-
-if __name__ == "__main__":
-    path = "Z:/01_研究テーマ/14_三重IH改善/08_生産チャート/202106_GRW5102B0"
-    singlecurve(path, 2)
-
-
-

@@ -48,6 +48,17 @@ class AmbTemp:
         
         return self.df
 
+    def kuwana_weather():
+        """
+        使っていない
+        自動で取得できるとよいが・・
+        """
+        df = pd.read_csv("kuwana_weather.csv", skiprows=5, usecols=(0, 1))
+        df.columns = ["日時", "気温"]
+        df["日時"] = pd.to_datetime(df["日時"])
+        # df = df.set_index("日時")
+        return df
+
 
 if __name__ == "__main__":
     path = "Z:/01_研究テーマ/14_三重IH改善/08_生産チャート/202106_GRW5102B0/amb/amb.csv"
