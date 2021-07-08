@@ -41,7 +41,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import datetime
-from preprocess import preprocess
+from preprocess import Preprocess
 import os
 
 
@@ -62,7 +62,7 @@ def create_ax(tate=1, yoko=1, tatemm=127, yokomm=170):
 
 def singlecurve(path, graph_index, character="temperature"):
     
-    df, start_end_index = preprocess(path).getdata()
+    df, start_end_index = Preprocess(path).getdata()
 
     if character == "temperature":
         chara1 = "ワーク外側温度"
@@ -88,7 +88,7 @@ def singlecurve(path, graph_index, character="temperature"):
 
 def curves(path, graph_index):
 
-    df, start_end_index = preprocess(path).getdata()
+    df, start_end_index = Preprocess(path).getdata()
 
     # numpyarrayに変換
     # series のままだとMatplotlib でplot した時に X軸の値にインデックス値を使われてしまう．
@@ -294,7 +294,7 @@ def days_history(year, month, firstday, days=1, character="carbide", **kwargs):
 
 
 def all_hist(character="carbide"):
-    df, start_end_index = preprocess(path).getdata()
+    df, start_end_index = Preprocess(path).getdata()
     df = get_characteristic_data(character)  # プロット期間を指定するために必要
     fig, ax = create_ax(1, 1, tatemm=50, yokomm=300)
     annotate_index = range(0, len(start_end_index) + 1, 100)
@@ -311,35 +311,6 @@ def kuwana_weather():
     # df = df.set_index("日時")
     return df
 
-
-def amb_temps():
-    """
-    周辺温度データ
-    """
-
-    # 必要な列だけを読み込み，列名をつける． 0, 1 列が日付と時間
-    # Chino用
-    # df = pd.read_csv(workdir + '/amb/コイル冷却水.csv', usecols=(0, 1, 2, 3), skiprows=1)
-    # df.columns = ["date", "time", "in", "out"]
-    # df["diff"] = df["out"] - df["in"]
-
-    # graphtec用
-    df = pd.read_csv(workdir + '/amb/電源冷却水.csv', usecols=(1, 2, 4, 5), skiprows=35)
-    df.columns = ["date", "time", "out", "in"]
-    df["in"] = df["in"].str[3:]
-    df["out"] = df["out"].str[3:]
-    df = df.astype({"in":float, "out":float})
-
-    # 日付と時間が別れているので結合しdatetimeに変換
-    df["日時"] = df["date"].str.cat(df["time"], sep=" ")
-    df["日時"] = pd.to_datetime(df["日時"])
-
-    # 日付と時間だけの列を削除
-    df = df.drop(["date", "time"], axis=1)
-
-    # 日時の列を行名に使用
-    # df = df.set_index("日時")
-    return df
 
 
 if __name__ == "__main__":

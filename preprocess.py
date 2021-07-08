@@ -9,7 +9,7 @@ import os
 import numpy as np
 import pandas as pd
 
-class preprocess:
+class Preprocess:
 
     def __init__(self, path):
         if path[-1] != '/':

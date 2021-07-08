@@ -1,18 +1,34 @@
 var layout = {
   // title:'IPQ',
   height: 600,
+  xaxis: {
+    tickmode: 'auto',
+    ticks: 'inside',
+    linewidth: 1,
+    title: '実施日時'},
+    yaxis: {
+      tickmode: 'auto',
+      ticks: 'inside',
+      linewidth: 1,
+      title: '温度 (℃)'}
+  
   // width: 600
 };
 
+
 var layout2 = {
-  // xaxis: {
-  //   range: [ 0, 100 ]
-  // },
-  // yaxis: {
-  //   range: [550, 920]
-  // },
+  xaxis: {
+    tickmode: 'auto',
+    ticks: 'inside',
+    linewidth: 1,
+    title: '加熱時間 (s)'},
+  yaxis: {
+    tickmode: 'auto',
+    ticks: 'inside',
+    linewidth: 1,
+    title: '温度 (℃)'},
   // title: 'single graph',
-  yaxis: {title: 'temperature'},
+
   yaxis2: {
     title: 'MV',
     overlaying: 'y',
@@ -33,6 +49,7 @@ var app = new Vue({
   el: '#app',
   data: {
     myPlot: document.getElementById("myDiv"),
+    doadd: false,
     id: null,
     path: null,
     options: [
@@ -44,7 +61,8 @@ var app = new Vue({
       {text: '2021/5 GRW5102(B0)', value: 'Z:/01_研究テーマ/14_三重IH改善/06_周辺温度測定/202106_GRW5102B0/'},
       {text: '2021/6 GRT7101(C0)', value: 'Z:/01_研究テーマ/14_三重IH改善/07_冷却水温度測定/202106_GRT7101C0/'},
       {text: '2021/6 GRW5102(C0)', value: 'Z:/01_研究テーマ/14_三重IH改善/08_生産チャート/202106_GRW5102C0/'},
-      {text: '2021/6 GRW5102(B0)', value: 'Z:/01_研究テーマ/14_三重IH改善/08_生産チャート/202106_GRW5102B0/'}
+      {text: '2021/6 GRW5102(B0)', value: 'Z:/01_研究テーマ/14_三重IH改善/08_生産チャート/202106_GRW5102B0/'},
+      {text: '2021/7 GRW5102(B0)', value: 'Z:/01_研究テーマ/14_三重IH改善/08_生産チャート/202107_GRW5102B0/'}
 
     ],
     loading: false,
@@ -187,8 +205,8 @@ var app = new Vue({
             this.single3.x = this.single1.x,
             this.single3.y = response.data.mv,
             // Plotly.newPlot('singlePlot', [this.single1, this.single2, this.single3], layout2)
-            
-            Plotly.newPlot('singlePlot', [this.single1, this.single2], layout2, config)
+
+            this.doadd ? Plotly.addTraces('singlePlot', [this.single1, this.single2]) : Plotly.newPlot('singlePlot', [this.single1, this.single2], layout2)
           });
       }
     }
