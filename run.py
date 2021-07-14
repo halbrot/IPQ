@@ -7,6 +7,7 @@ import time
 
 # sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "calc"))
 import edit_for_graph as efg
+from ambtemp import AmbTemp
 
 from flask import Flask, render_template, Response,request,redirect,url_for, jsonify
 
@@ -60,8 +61,7 @@ def singleplot():
     id = int(request.args.get('id'))
 
     # path="Z:/01_研究テーマ/14_三重IH改善/07_冷却水温度測定/202106_GRT7101C0/"
-    chara1list, chara2list, mv , time = efg.singlecurve(path, id, character="temperature")
-    print(time[0:5])
+    chara1list, chara2list, mv , time = efg.singlecurve(path, id, character="power")
 
     response = {'time': time,
                 'data1': chara1list,
@@ -74,6 +74,59 @@ def singleplot():
     response.headers["Access-Control-Allow-Origin"]="*"
 
     return response
+
+@app.route('/ambtemp', methods=['GET'])
+def ambtemp():
+
+    path = str(request.args.get('path'))
+    filename = str(request.args.get('filename'))
+
+    df = AmbTemp(path + 'amb/' + filename).getdata()
+
+    # 日時をstring のリストに変換
+    datetime_string = []
+    for date in df["日時"].values:
+        datetime_string.append(str(date))
+
+    response = {
+        'time': datetime_string,
+        'in': df['in'].values.tolist(),
+        'out': df['out'].values.tolist()
+    }
+
+    response = jsonify(response)
+
+    # CORS を回避 qiitaのストック記事参照
+    response.headers["Access-Control-Allow-Origin"]="*"
+
+    return response
+
+@app.route('/ambcheck', methods=['GET'])
+def ambcheck():
+
+    path = str(request.args.get('path'))
+    import os, glob
+
+    files = []
+
+    if os.path.exists(path + 'amb'):
+        fullpathfiles = glob.glob(path + 'amb/*.csv')
+        for fullpathfile in fullpathfiles:
+            files.append(os.path.split(fullpathfile)[1])
+    else:
+        files = None
+
+    response = {
+        'file': files
+    }
+
+    response = jsonify(response)
+
+    # CORS を回避 qiitaのストック記事参照
+    response.headers["Access-Control-Allow-Origin"]="*"
+
+    return response
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)

@@ -7,12 +7,26 @@ import pandas as pd
 
 class AmbTemp:
 
-    def __init__(self, filepath, maker):
+    def __init__(self, filepath):
         """
-        makerはロガーのメーカー
+        filepath はファイル名まで含める
         """
-        self.maker = maker
         self.filepath = filepath
+
+    def check_maker(self):
+        f = open(self.filepath, 'r', encoding='UTF-8')
+        topline = f.readline()
+        f.close()
+        print(topline[3:])
+
+        # CSVファイルの1行目でロガーのメーカーを判断
+        # 前後に変な文字が入っているので適当にスライスして文字列と比較
+        if topline[:-1] == 'ベンダ,"GRAPHTEC Corporation"':
+            self.maker = 'graphtec'
+        elif topline[3:-1] == '-CH1[ﾟC],-CH2[ﾟC],-CH3[ﾟC],-CH4[ﾟC],-CH5[ﾟC],-CH6[ﾟC],-CH7[ﾟC],-CH8[ﾟC],-CH9[ﾟC],-CH10[ﾟC],-CH11[ﾟC],-CH12[ﾟC]':
+            self.maker = 'chino'
+        else:
+            self.maker = 'other'
 
     def load_file(self):
         """
@@ -40,11 +54,18 @@ class AmbTemp:
         # 日付と時間だけの列を削除
         self.df = self.df.drop(["date", "time"], axis=1)
 
+    def judge_inout(self):
+        if self.df['out'].sum() < self.df["in"].sum():
+            self.df.rename(columns={'in':'out', 'out':'in'}, inplace=True)
+            
+
 
     def getdata(self):
         """
         """
+        self.check_maker()
         self.load_file()
+        self.judge_inout()
         
         return self.df
 
@@ -61,8 +82,10 @@ class AmbTemp:
 
 
 if __name__ == "__main__":
-    path = "Z:/01_研究テーマ/14_三重IH改善/08_生産チャート/202106_GRW5102B0/amb/amb.csv"
-    df = AmbTemp(path, 'chino').getdata()
-
+    path = 'Z:/01_研究テーマ/14_三重IH改善/08_生産チャート/202106_GRW5102B0/amb/amb.csv'
+    df = AmbTemp(path).getdata()
     print(df)
+    # df = AmbTemp(path, 'chino').getdata()
+
+    # print(df)
 

@@ -48,10 +48,12 @@ class Preprocess:
         if self.df.shape[1]!=21:
             return
         
+        # 電圧出力：操作量(%)
         self.df.columns = ["dtime", "ms", "ワーク外側温度", "ワーク内側温度", "IHヒータ電圧値", "IHヒータ周波数",
                     "IHヒータ出力電力値", "IHヒータ直流電圧値", "Channel1", "電圧出力", "材温熱電対1",
                     "材温熱電対2", "材温熱電対3", "Channel8", "材温熱電対4", "材温熱電対5", "炭化物面積率1",
                     "炭化物面積率2", "IHﾘﾌﾀｰｻｰﾎﾞ負荷率", "回転", "回転"]
+
 
 
     def drop_unused_columns(self):

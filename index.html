@@ -25,13 +25,23 @@
             </option>
           </select>
         </div>
-        <div class="col-1">
-          <button v-on:click="dorefresh" name="button" class="btn btn-primary">データ更新</button>
+        <div class="col-2">
+          <button v-on:click="historyplot(1)" name="button" class="btn btn-primary">データ更新</button>
         </div>
         <div class="col-auto">
           <div class="spinner-border text-primary" role="status" v-if="loading" >
             <span class="visually-hidden" >Loading...</span>
           </div>
+        </div>
+        <div class="col-2">
+          <select class="form-select" v-model="ambforplot">
+            <option v-for="ambfile in ambfiles" v-bind:value="ambfile">
+              {{ambfile}}
+            </option>
+          </select>
+        </div>
+        <div class="col-2">
+          <button v-on:click="amb" name="button" class="btn btn-primary">冷却水温度</button>
         </div>
       
       </div>
