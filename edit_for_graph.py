@@ -19,6 +19,18 @@ def singlecurve(path, graph_index, character="temperature"):
     elif character == "power":
         chara1 = "IHヒータ出力電力値"
         chara2 = "IHヒータ出力電力値"
+    elif character == "frequency":
+        chara1 = "IHヒータ周波数"
+        chara2 = "IHヒータ周波数"
+    elif character == "power":
+        chara1 = "IHヒータ出力電力値"
+        chara2 = "IHヒータ出力電力値"
+    elif character == "voltageAC":
+        chara1 = "IHヒータ電圧値"
+        chara2 = "IHヒータ電圧値"
+    elif character == "voltageDC":
+        chara1 = "IHヒータ直流電圧値"
+        chara2 = "IHヒータ直流電圧値"
 
     i = graph_index
 
@@ -58,7 +70,6 @@ def get_characteristic_data(path, character, refresh=False):
 
     # 各ヒートでの特性値をリストに抽出
     if character == "carbide":
-
         datetime = [df["日時"][x[1]] for x in iter(start_end_index)]
         chara1list = [df["炭化物面積率1"][x[1]] for x in iter(start_end_index)]
         chara2list = [df["炭化物面積率2"][x[1]] for x in iter(start_end_index)]
@@ -69,16 +80,20 @@ def get_characteristic_data(path, character, refresh=False):
         chara1list = [arr[x[0]:x[1]+1, 1].max() for x in iter(start_end_index)]
         chara2list = [arr[x[0]:x[1]+1, 2].max() for x in iter(start_end_index)]
 
-    elif character == "frequency":
-        for i in range(len(start_end_index)):
-            datetime.append(df["日時"][start_end_index[i][1]])
-            chara1list.append(df["IHヒータ周波数"][start_end_index[i][0] + 3])
-            chara2list.append(df["IHヒータ周波数"][start_end_index[i][1] - 3])
-    elif character == "power":
-        for i in range(len(start_end_index)):
-            datetime.append(df["日時"][start_end_index[i][1]])
-            chara1list.append(df["IHヒータ出力電力値"][start_end_index[i][0]:start_end_index[i][0]+30].sum())
-            chara2list.append(df["IHヒータ出力電力値"][start_end_index[i][0]:start_end_index[i][0]+30].sum())
+    else:
+        if character == "frequency":
+            column = "IHヒータ周波数"
+        elif character == "power":
+            column = "IHヒータ出力電力値"
+        elif character == 'voltageAC':
+            column = "IHヒータ電圧値"
+        elif character == 'voltageDC':
+            column = "IHヒータ直流電圧値"
+
+        arr = df.loc[:,["日時", column]].values
+        datetime = [arr[x[1],0] for x in iter(start_end_index)]
+        chara1list = [arr[x[0]+30:x[0]+250, 1].sum()/220 for x in iter(start_end_index)]
+        chara2list = [arr[x[0]+30:x[0]+250, 1].sum()/220 for x in iter(start_end_index)]
 
     print(dt.now()-start)
 

@@ -23,8 +23,8 @@ def index():
 @app.route('/getdata', methods=['GET'])
 def getdata():
 
-
     path = str(request.args.get('path'))
+    character = str(request.args.get('character'))
     refresh = int(request.args.get('refresh'))
 
     if refresh==1:
@@ -32,7 +32,7 @@ def getdata():
     else:
         refresh=False
 
-    df = efg.get_characteristic_data(path, "temperature", refresh)
+    df = efg.get_characteristic_data(path, character, refresh)
 
     # 日時をstring のリストに変換
     datetime_string = []
@@ -58,10 +58,11 @@ def getdata():
 def singleplot():
 
     path = str(request.args.get('path'))
+    character = str(request.args.get('character'))
     id = int(request.args.get('id'))
 
     # path="Z:/01_研究テーマ/14_三重IH改善/07_冷却水温度測定/202106_GRT7101C0/"
-    chara1list, chara2list, mv , time = efg.singlecurve(path, id, character="power")
+    chara1list, chara2list, mv , time = efg.singlecurve(path, id, character=character)
 
     response = {'time': time,
                 'data1': chara1list,

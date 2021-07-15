@@ -45,6 +45,16 @@
         </div>
       
       </div>
+
+      <div class="row">
+        <div class="col-2">
+          <select class="form-select" v-model="selectedCharacter">
+            <option v-for="option in characterList" v-bind:value="option.value">
+              {{option.text}}
+            </option>
+          </select>
+        </div>
+      </div>
     </div>  
 
 

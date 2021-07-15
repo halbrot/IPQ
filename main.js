@@ -5,18 +5,19 @@ var layout = {
     tickmode: 'auto',
     ticks: 'inside',
     linewidth: 1,
-    title: '実施日時'},
-    yaxis: {
-      tickmode: 'auto',
-      ticks: 'inside',
-      linewidth: 1,
-      title: '温度 (℃)'},
-    yaxis2: {
-      overlaying: 'y',
-      side: 'right',
-      autorange: 'reversed'
+    title: '実施日時'
+  },
+  yaxis: {
+    tickmode: 'auto',
+    ticks: 'inside',
+    linewidth: 1,
+    title: '温度 (℃)'
+  },
+  yaxis2: {
+    overlaying: 'y',
+    side: 'right',
+    autorange: 'reversed'
     }
-  
   // width: 600
 };
 
@@ -47,8 +48,16 @@ var config = {
   responsive: true,
   scrollZoom: true,
   autosizable: true,
-  }
+};
 
+var labelDic = {
+  carbide: '炭化物面積率 (%)',
+  temperature: '最高到達温度 (℃)',
+  frequency: '周波数 (Hz)',
+  power: '電力 (W)',
+  voltageAC: '高周波電圧 (Vrms)',
+  voltageDC: '直流電圧 (V)'
+};
 
 var app = new Vue({
   el: '#app',
@@ -59,7 +68,16 @@ var app = new Vue({
     path: null,
     ambfiles: null,
     ambforplot: null,
-    ambpath: 'Z:/01_研究テーマ/14_三重IH改善/08_生産チャート/202106_GRW5102B0/amb/amb.csv',
+    selectedCharacter: 'temperature',
+    characterList: [
+      {text: '炭化物面積率', value: 'carbide'},
+      {text: '最高到達温度', value: 'temperature'},
+      {text: '周波数', value: 'frequency'},
+      {text: 'IHヒータ出力電力値', value: 'power'},
+      {text: 'IHヒータ電圧値', value: 'voltageAC'},
+      {text: 'IHヒータ直流電圧値', value: 'voltageDC'}
+
+    ],
     options: [
       {text: '2020/10', value: 'Z:/01_研究テーマ/14_三重IH改善/05_量産時日光の影響/生データ/202010/'},
       {text: '2021/1 GRT7101(C0)', value: 'Z:/01_研究テーマ/14_三重IH改善/05_量産時日光の影響/生データ/202101/'},
@@ -70,10 +88,11 @@ var app = new Vue({
       {text: '2021/6 GRT7101(C0)', value: 'Z:/01_研究テーマ/14_三重IH改善/07_冷却水温度測定/202106_GRT7101C0/'},
       {text: '2021/6 GRW5102(C0)', value: 'Z:/01_研究テーマ/14_三重IH改善/08_生産チャート/202106_GRW5102C0/'},
       {text: '2021/6 GRW5102(B0)', value: 'Z:/01_研究テーマ/14_三重IH改善/08_生産チャート/202106_GRW5102B0/'},
-      {text: '2021/7 GRW5102(B0)', value: 'Z:/01_研究テーマ/14_三重IH改善/08_生産チャート/202107_GRW5102B0/'}
-
+      {text: '2021/7 GRW5102(B0)', value: 'Z:/01_研究テーマ/14_三重IH改善/08_生産チャート/202107_GRW5102B0/'},
+      {text: '2021/7 GRW5102(C0)', value: 'Z:/01_研究テーマ/14_三重IH改善/08_生産チャート/202107_GRW5102C0/'}
     ],
     loading: false,
+    
     outer: {
       x: null,
       y: null,
@@ -123,7 +142,7 @@ var app = new Vue({
       //refresh: 0;再読み込みなし，1；CSVファイルを再読み込み
       this.loading = true;
       axios
-        .get(`http://10.112.120.156:5000/getdata?path=${this.path}&refresh=${refresh}`)
+        .get(`http://10.112.120.156:5000/getdata?path=${this.path}&character=${this.selectedCharacter}&refresh=${refresh}`)
         .then(response => {
           this.outer.x = response.data.datetime,
           this.outer.y = response.data.data1,
@@ -135,7 +154,7 @@ var app = new Vue({
           this.loading = false
           this.refresh = false,
 
-          Plotly.newPlot('myDiv', [this.outer, this.inner], layout, config)
+          Plotly.newPlot('myDiv', [this.outer, this.inner], layout, config);
           this.myPlot.on("plotly_click", function(data){
             console.log(data.points[0].text);
             app.id = parseInt(data.points[0].text);
@@ -164,12 +183,20 @@ var app = new Vue({
     path:{
       handler: function(){
         this.historyplot(0)
-        }
+      }
+    },
+    selectedCharacter:{
+      handler: function(){
+        layout.yaxis.title = labelDic[this.selectedCharacter];
+        layout2.yaxis.title = labelDic[this.selectedCharacter];
+        this.historyplot(0);
+        
+      }
     },
     id:{
       handler: function(){
         axios
-          .get(`http://10.112.120.156:5000/singleplot?path=${this.path}&id=${this.id}`)
+          .get(`http://10.112.120.156:5000/singleplot?path=${this.path}&character=${this.selectedCharacter}&id=${this.id}`)
           .then(response => {
             this.single1.x = response.data.time,
             this.single1.y = response.data.data1,
