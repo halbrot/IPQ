@@ -65,6 +65,7 @@ var app = new Vue({
     myPlot: document.getElementById("myDiv"),
     doadd: false,
     id: null,
+    drawMV: null,
     path: null,
     ambfiles: null,
     ambforplot: null,
@@ -181,7 +182,7 @@ var app = new Vue({
     },
   watch: {
     path:{
-      handler: function(){
+      handler: function() {
         this.historyplot(0)
       }
     },
@@ -204,9 +205,9 @@ var app = new Vue({
             this.single2.x = this.single1.x,
             this.single3.x = this.single1.x,
             this.single3.y = response.data.mv,
-            // Plotly.newPlot('singlePlot', [this.single1, this.single2, this.single3], layout2)
+            this.drawMV ? series = [this.single1, this.single2, this.single3] : series = [this.single1, this.single2],
+            Plotly.newPlot('singlePlot', series, layout2, config)
 
-            this.doadd ? Plotly.addTraces('singlePlot', [this.single1, this.single2]) : Plotly.newPlot('singlePlot', [this.single1, this.single2], layout2, config)
           });
       }
     }
