@@ -76,7 +76,8 @@ var app = new Vue({
       {text: '周波数', value: 'frequency'},
       {text: 'IHヒータ出力電力値', value: 'power'},
       {text: 'IHヒータ電圧値', value: 'voltageAC'},
-      {text: 'IHヒータ直流電圧値', value: 'voltageDC'}
+      {text: 'IHヒータ直流電圧値', value: 'voltageDC'},
+      {text: 'MV (電圧出力)', value: 'MV'}
 
     ],
     options: [

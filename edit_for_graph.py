@@ -31,6 +31,9 @@ def singlecurve(path, graph_index, character="temperature"):
     elif character == "voltageDC":
         chara1 = "IHヒータ直流電圧値"
         chara2 = "IHヒータ直流電圧値"
+    elif character == 'MV':
+        chara1 = '電圧出力'
+        chara2 = '電圧出力'
 
     i = graph_index
 
@@ -89,6 +92,8 @@ def get_characteristic_data(path, character, refresh=False):
             column = "IHヒータ電圧値"
         elif character == 'voltageDC':
             column = "IHヒータ直流電圧値"
+        elif character == 'MV':
+            column = '電圧出力'
 
         arr = df.loc[:,["日時", column]].values
         datetime = [arr[x[1],0] for x in iter(start_end_index)]
