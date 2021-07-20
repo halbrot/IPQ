@@ -68,10 +68,15 @@
           </div>
         </div>
         <div class="col-2">
-          <div class="input-group">
+          <div v-if="isPower" class="input-group">
             <span class="input-group-text">平均化時間</span>
             <input type="text" aria-label="First name" class="form-control" v-model="startSec" v-on:keyup="trigger">
             <input type="text" aria-label="Last name" class="form-control" v-model="endSec" v-on:keyup="trigger">
+          </div>
+          <div v-else class="input-group">
+            <span class="input-group-text">平均化時間</span>
+            <input type="text" aria-label="First name" class="form-control" v-model="startSec" v-on:keyup="trigger" disabled>
+            <input type="text" aria-label="Last name" class="form-control" v-model="endSec" v-on:keyup="trigger" disabled>
           </div>
         </div>
       </div>

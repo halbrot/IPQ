@@ -70,6 +70,7 @@ var app = new Vue({
     doadd: false,
     id: null,
     drawMV: null,
+    isPower: false,
     startSec: 10,
     endSec: 20,
     path: null,
@@ -192,8 +193,16 @@ var app = new Vue({
         this.historyplot(0)
       }
 
-    }
     },
+    judgePower: function() {
+      if (this.selectedCharacter === 'temperature' || this.selectedCharacter === 'carbide') {
+        this.isPower = false;
+      }
+      else {
+        this.isPower = true;
+      }
+    }
+  },
   watch: {
     path:{
       handler: function() {
@@ -205,6 +214,7 @@ var app = new Vue({
         layout.yaxis.title = labelDic[this.selectedCharacter];
         layout2.yaxis.title = labelDic[this.selectedCharacter];
         this.historyplot(0);
+        this.judgePower();
         
       }
     },
