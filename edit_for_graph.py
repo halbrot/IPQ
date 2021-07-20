@@ -6,6 +6,16 @@ import datetime
 from preprocess import Preprocess
 from numba import jit
 
+
+chara2column = {
+      "frequency": "IHヒータ周波数",
+      "power": "IHヒータ出力電力値",
+      'voltageAC': "IHヒータ電圧値",
+      'voltageDC': "IHヒータ直流電圧値",
+      'MV': '電圧出力'
+}
+
+
 def singlecurve(path, graph_index, character="temperature"):
     
     df, start_end_index = Preprocess(path).getdata()
@@ -16,24 +26,9 @@ def singlecurve(path, graph_index, character="temperature"):
     elif character == "carbide":
         chara1 = "炭化物面積率1"
         chara2 = "炭化物面積率2"
-    elif character == "power":
-        chara1 = "IHヒータ出力電力値"
-        chara2 = "IHヒータ出力電力値"
-    elif character == "frequency":
-        chara1 = "IHヒータ周波数"
-        chara2 = "IHヒータ周波数"
-    elif character == "power":
-        chara1 = "IHヒータ出力電力値"
-        chara2 = "IHヒータ出力電力値"
-    elif character == "voltageAC":
-        chara1 = "IHヒータ電圧値"
-        chara2 = "IHヒータ電圧値"
-    elif character == "voltageDC":
-        chara1 = "IHヒータ直流電圧値"
-        chara2 = "IHヒータ直流電圧値"
-    elif character == 'MV':
-        chara1 = '電圧出力'
-        chara2 = '電圧出力'
+    else:
+        chara1 = chara2 = chara2column(character)
+ 
 
     i = graph_index
 
@@ -84,16 +79,7 @@ def get_characteristic_data(path, character, refresh=False):
         chara2list = [arr[x[0]:x[1]+1, 2].max() for x in iter(start_end_index)]
 
     else:
-        if character == "frequency":
-            column = "IHヒータ周波数"
-        elif character == "power":
-            column = "IHヒータ出力電力値"
-        elif character == 'voltageAC':
-            column = "IHヒータ電圧値"
-        elif character == 'voltageDC':
-            column = "IHヒータ直流電圧値"
-        elif character == 'MV':
-            column = '電圧出力'
+        column = chara2column(character)
 
         arr = df.loc[:,["日時", column]].values
         datetime = [arr[x[1],0] for x in iter(start_end_index)]

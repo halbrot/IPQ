@@ -48,7 +48,12 @@
 
       <div class="row">
         <div class="col-2">
-          <select class="form-select" v-model="selectedCharacter">
+          <select v-if="path==null" class="form-select" v-model="selectedCharacter" disabled>
+            <option v-for="option in characterList" v-bind:value="option.value">
+              {{option.text}}
+            </option>
+          </select>
+          <select v-else class="form-select" v-model="selectedCharacter">
             <option v-for="option in characterList" v-bind:value="option.value">
               {{option.text}}
             </option>
