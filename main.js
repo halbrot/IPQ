@@ -5,12 +5,14 @@ var layout = {
     tickmode: 'auto',
     ticks: 'inside',
     linewidth: 1,
+    mirror: true,
     title: '実施日時'
   },
   yaxis: {
     tickmode: 'auto',
     ticks: 'inside',
     linewidth: 1,
+    mirror: true,
     title: '温度 (℃)'
   },
   yaxis2: {
@@ -27,11 +29,13 @@ var layout2 = {
     tickmode: 'auto',
     ticks: 'inside',
     linewidth: 1,
+    mirror: true,
     title: '加熱時間 (s)'},
   yaxis: {
     tickmode: 'auto',
     ticks: 'inside',
     linewidth: 1,
+    mirror: true,
     title: '温度 (℃)'},
   // title: 'single graph',
 
@@ -66,6 +70,8 @@ var app = new Vue({
     doadd: false,
     id: null,
     drawMV: null,
+    startSec: 10,
+    endSec: 20,
     path: null,
     ambfiles: null,
     ambforplot: null,
@@ -81,10 +87,11 @@ var app = new Vue({
 
     ],
     options: [
-      {text: '2020/10', value: 'Z:/01_研究テーマ/14_三重IH改善/05_量産時日光の影響/生データ/202010/'},
-      {text: '2021/1 GRT7101(C0)', value: 'Z:/01_研究テーマ/14_三重IH改善/05_量産時日光の影響/生データ/202101/'},
-      {text: '2021/2', value: 'Z:/01_研究テーマ/14_三重IH改善/05_量産時日光の影響/生データ/202102/'},
-      {text: '2021/3', value: 'Z:/01_研究テーマ/14_三重IH改善/05_量産時日光の影響/生データ/202103/'},
+      {text: '2020/10', value: 'Z:/01_研究テーマ/14_三重IH改善/08_生産チャート/202010/'},
+      {text: '2021/1 GRT7101(C0)', value: 'Z:/01_研究テーマ/14_三重IH改善/08_生産チャート/202101/'},
+      {text: '2021/2', value: 'Z:/01_研究テーマ/14_三重IH改善/08_生産チャート/202102/'},
+      {text: '2021/3', value: 'Z:/01_研究テーマ/14_三重IH改善/08_生産チャート/202103/'},
+      {text: 'PID改善実験', value: 'Z:/01_研究テーマ/14_三重IH改善/03_PID改善/生データ/'},
       {text: '2021/4 GRW5102(B0)', value: 'Z:/01_研究テーマ/14_三重IH改善/05_量産時日光の影響/生データ/202104/'},
       {text: '2021/5 GRW5102(B0)', value: 'Z:/01_研究テーマ/14_三重IH改善/06_周辺温度測定/202106_GRW5102B0/'},
       {text: '2021/6 GRT7101(C0)', value: 'Z:/01_研究テーマ/14_三重IH改善/07_冷却水温度測定/202106_GRT7101C0/'},
@@ -144,7 +151,7 @@ var app = new Vue({
       //refresh: 0;再読み込みなし，1；CSVファイルを再読み込み
       this.loading = true;
       axios
-        .get(`http://10.112.120.156:5000/getdata?path=${this.path}&character=${this.selectedCharacter}&refresh=${refresh}`)
+        .get(`http://10.112.120.156:5000/getdata?path=${this.path}&character=${this.selectedCharacter}&startsec=${this.startSec}&endsec=${this.endSec}&refresh=${refresh}`)
         .then(response => {
           this.outer.x = response.data.datetime,
           this.outer.y = response.data.data1,
@@ -175,11 +182,17 @@ var app = new Vue({
           x = response.data.time,
           yin = response.data.in,
           yout = response.data.out,
-          trace1 = {x:x, y:yin, yaxis:'y2', name: 'in', mode:'lines', type:'scatter'},
-          trace2 = {x:x, y:yout, yaxis:'y2', name: 'out', mode:'lines', type:'scatter'}
-          Plotly.addTraces('myDiv', [trace1, trace2])
+          traceIn = {x:x, y:yin, yaxis:'y2', name: 'in', mode:'lines', type:'scatter', line:{color:'blue'}, opacity: 0.5},
+          traceOut = {x:x, y:yout, yaxis:'y2', name: 'out', mode:'lines', type:'scatter', line:{color:'red'}, opacity: 0.5}
+          Plotly.addTraces('myDiv', [traceIn, traceOut])
         })
+      },
+    trigger: function(event) {
+      if (event.keyCode === 13){
+        this.historyplot(0)
       }
+
+    }
     },
   watch: {
     path:{

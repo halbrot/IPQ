@@ -27,7 +27,7 @@ def singlecurve(path, graph_index, character="temperature"):
         chara1 = "炭化物面積率1"
         chara2 = "炭化物面積率2"
     else:
-        chara1 = chara2 = chara2column(character)
+        chara1 = chara2 = chara2column[character]
  
 
     i = graph_index
@@ -45,7 +45,7 @@ def singlecurve(path, graph_index, character="temperature"):
     return chara1list, chara2list, mv, time
 
 
-def get_characteristic_data(path, character, refresh=False):
+def get_characteristic_data(path, character, startsec=0, endsec=30, refresh=False):
     """
     character: carbide → 炭化物面積率の最終値
                temperature → ワーク温度の"最大値"
@@ -56,14 +56,8 @@ def get_characteristic_data(path, character, refresh=False):
 
     df, start_end_index = Preprocess(path).getdata(refresh)
 
-    datanum = len(start_end_index)
-    datetime = []
-    chara1list = []
-    chara2list = []
-
     from datetime import datetime as dt
     start = dt.now()
-    # it = iter(start_end_index)
     
 
     # 各ヒートでの特性値をリストに抽出
@@ -79,12 +73,27 @@ def get_characteristic_data(path, character, refresh=False):
         chara2list = [arr[x[0]:x[1]+1, 2].max() for x in iter(start_end_index)]
 
     else:
-        column = chara2column(character)
+        column = chara2column[character]
 
         arr = df.loc[:,["日時", column]].values
         datetime = [arr[x[1],0] for x in iter(start_end_index)]
-        chara1list = [arr[x[0]+30:x[0]+250, 1].sum()/220 for x in iter(start_end_index)]
-        chara2list = [arr[x[0]+30:x[0]+250, 1].sum()/220 for x in iter(start_end_index)]
+        # chara1list = [arr[x[0]+30:x[0]+250, 1].sum()/220 for x in iter(start_end_index)]
+        # chara2list = [arr[x[0]+30:x[0]+250, 1].sum()/220 for x in iter(start_end_index)]
+        chara1list = []
+        
+        for i in iter(start_end_index):
+            for j in range(*i):
+                time = (arr[j, 0] - arr[i[0], 0]).total_seconds()
+                if time == startsec:
+                    startidx = j
+                if time == endsec:
+                    endidx = j
+                    chara1list.append(arr[startidx:endidx+1, 1].sum()/(endidx - startidx + 1))
+                    break
+        
+        chara2list = chara1list
+
+
 
     print(dt.now()-start)
 

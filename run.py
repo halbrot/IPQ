@@ -25,6 +25,8 @@ def getdata():
 
     path = str(request.args.get('path'))
     character = str(request.args.get('character'))
+    startsec = int(request.args.get('startsec'))
+    endsec = int(request.args.get('endsec'))
     refresh = int(request.args.get('refresh'))
 
     if refresh==1:
@@ -32,7 +34,7 @@ def getdata():
     else:
         refresh=False
 
-    df = efg.get_characteristic_data(path, character, refresh)
+    df = efg.get_characteristic_data(path, character, startsec, endsec, refresh)
 
     # 日時をstring のリストに変換
     datetime_string = []
