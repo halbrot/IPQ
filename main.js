@@ -103,24 +103,24 @@ var app = new Vue({
     ],
     loading: false,
     
-    outer: {
-      x: null,
-      y: null,
-      text : null,
-      name: 'outer',
-      mode: 'markers',
-      type: 'scatter',
-      marker: { size: 6 }
-    },
-    inner: {
-      x: null,
-      y: null,
-      text : null,
-      name: 'inner',
-      mode: 'markers',
-      type: 'scatter',
-      marker: { size: 6 }
-    },
+    // outer: {
+    //   x: null,
+    //   y: null,
+    //   text : null,
+    //   name: 'outer',
+    //   mode: 'markers',
+    //   type: 'scatter',
+    //   marker: { size: 6 }
+    // },
+    // inner: {
+    //   x: null,
+    //   y: null,
+    //   text : null,
+    //   name: 'inner',
+    //   mode: 'markers',
+    //   type: 'scatter',
+    //   marker: { size: 6 }
+    // },
     single1: {
       x: null,
       y: null,
@@ -154,17 +154,25 @@ var app = new Vue({
       axios
         .get(`http://10.112.120.156:5000/getdata?path=${this.path}&character=${this.selectedCharacter}&startsec=${this.startSec}&endsec=${this.endSec}&refresh=${refresh}`)
         .then(response => {
-          this.outer.x = response.data.datetime,
-          this.outer.y = response.data.data1,
-          this.inner.y = response.data.data2,
-          this.inner.x = this.outer.x,
-          this.outer.text = response.data.id,
-          this.inner.text = this.outer.text,
 
-          this.loading = false
-          this.refresh = false,
+          // オブジェクトの要素数を取得
+          // 日時，id は必ず含まれており，それ以外が特性値
+          // このため，特性値の数は num-2
+          num = Object.keys(response.data).length,
+          x = response.data.datetime;
+          id = response.data.id;
 
-          Plotly.newPlot('myDiv', [this.outer, this.inner], layout, config);
+          seriesname = ['外側', '内側']
+          y = []
+          series = []
+          for(let i=0;i<num-2;i++) {
+            y.push(response.data['data' + String(i)]);
+            series.push({x:x, y:y[i], text:id, name:seriesname[i], mode: 'markers', type: 'scatter', marker: { size: 6 }})
+          }
+    
+          this.loading = false;
+
+          Plotly.newPlot('myDiv', series, layout, config);
           this.myPlot.on("plotly_click", function(data){
             console.log(data.points[0].text);
             app.id = parseInt(data.points[0].text);
@@ -223,14 +231,41 @@ var app = new Vue({
         axios
           .get(`http://10.112.120.156:5000/singleplot?path=${this.path}&character=${this.selectedCharacter}&id=${this.id}`)
           .then(response => {
-            this.single1.x = response.data.time,
-            this.single1.y = response.data.data1,
-            this.single2.y = response.data.data2,
-            this.single2.x = this.single1.x,
-            this.single3.x = this.single1.x,
-            this.single3.y = response.data.mv,
-            this.drawMV ? series = [this.single1, this.single2, this.single3] : series = [this.single1, this.single2],
-            Plotly.newPlot('singlePlot', series, layout2, config)
+
+
+          // オブジェクトの要素数を取得
+          // 日時，id は必ず含まれており，それ以外が特性値
+          // このため，特性値の数は num-2
+          num = Object.keys(response.data).length,
+          x = response.data.time;
+          mv = response.data.mv;
+
+          if (num===4){
+            seriesname = ['外側', '内側']
+          }
+          else{
+            seriesname = [this.selectedCharacterl]
+          }
+
+          y = []
+          series = []
+          for(let i=0;i<num-2;i++) {
+            y.push(response.data['data' + String(i)]);
+            series.push({x:x, y:y[i], text:id, name:seriesname[i], mode: 'lines', type: 'scatter', marker: { size: 6 }})
+          }
+
+          if (this.drawMV) series.push({x:x, y:mv, text:id, name:'MV',yaxis: 'y2', mode: 'lines', type: 'scatter', marker: { size: 6 }});
+
+          Plotly.newPlot('singlePlot', series, layout2, config)
+
+            // this.single1.x = response.data.time,
+            // this.single1.y = response.data.data1,
+            // this.single2.y = response.data.data2,
+            // this.single2.x = this.single1.x,
+            // this.single3.x = this.single1.x,
+            // this.single3.y = response.data.mv,
+            // this.drawMV ? series = [this.single1, this.single2, this.single3] : series = [this.single1, this.single2],
+            // Plotly.newPlot('singlePlot', series, layout2, config)
 
           });
       }

@@ -34,20 +34,24 @@ def getdata():
     else:
         refresh=False
 
-    df = efg.get_characteristic_data(path, character, startsec, endsec, refresh)
+    charalist = efg.get_characteristic_data(path, character, startsec, endsec, refresh)
 
     # 日時をstring のリストに変換
-    datetime_string = []
-    for date in df["日時"].values:
-        datetime_string.append(str(date))
+    datetime_string = [str(date) for date in charalist[0]]
 
     # マウスオーバーで表示するためのID
-    id = list(range(df.shape[0]))
-    
-    response = {'datetime':datetime_string,
-                'data1': df["特性値1"].values.tolist(),
-                'data2': df["特性値2"].values.tolist(),
-                'id' : id}
+    id = list(range(len(charalist[0])))
+
+    response={}
+    response['datetime'] = datetime_string
+    for i in range(len(charalist)-1):
+        response['data' + str(i)] = charalist[i+1]
+    response['id'] = id
+
+    # response = {'datetime':datetime_string,
+    #             'data1': df["特性値1"].values.tolist(),
+    #             'data2': df["特性値2"].values.tolist(),
+    #             'id' : id}
 
     response = jsonify(response)
 
@@ -64,12 +68,18 @@ def singleplot():
     id = int(request.args.get('id'))
 
     # path="Z:/01_研究テーマ/14_三重IH改善/07_冷却水温度測定/202106_GRT7101C0/"
-    chara1list, chara2list, mv , time = efg.singlecurve(path, id, character=character)
+    time, mv, charalist = efg.singlecurve(path, id, character=character)
 
-    response = {'time': time,
-                'data1': chara1list,
-                'data2': chara2list,
-                'mv' : mv}
+    # response = {'time': time,
+    #             'data1': chara1list,
+    #             'data2': chara2list,
+    #             'mv' : mv}
+
+    response={}
+    response['datetime'] = time
+    for i in range(len(charalist)):
+        response['data' + str(i)] = charalist[i]
+    response['mv'] = mv
 
     response = jsonify(response)
 

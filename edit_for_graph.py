@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from typing import List
 import numpy as np
 import pandas as pd
 import datetime
@@ -8,11 +9,13 @@ from numba import jit
 
 
 chara2column = {
-      "frequency": "IHヒータ周波数",
-      "power": "IHヒータ出力電力値",
-      'voltageAC': "IHヒータ電圧値",
-      'voltageDC': "IHヒータ直流電圧値",
-      'MV': '電圧出力'
+    "temperature": ["ワーク外側温度", "ワーク内側温度"],
+    "carbide": ["炭化物面積率1", "炭化物面積率2"],
+    "frequency": "IHヒータ周波数",
+    "power": "IHヒータ出力電力値",
+    'voltageAC': "IHヒータ電圧値",
+    'voltageDC': "IHヒータ直流電圧値",
+    'MV': '電圧出力'
 }
 
 
@@ -20,20 +23,26 @@ def singlecurve(path, graph_index, character="temperature"):
     
     df, start_end_index = Preprocess(path).getdata()
 
-    if character == "temperature":
-        chara1 = "ワーク外側温度"
-        chara2 = "ワーク内側温度"
-    elif character == "carbide":
-        chara1 = "炭化物面積率1"
-        chara2 = "炭化物面積率2"
-    else:
-        chara1 = chara2 = chara2column[character]
- 
+    column = chara2column[character]
+    if type(column) is str:
+        column = [column]
 
+
+    # if character == "temperature":
+    #     chara1 = "ワーク外側温度"
+    #     chara2 = "ワーク内側温度"
+    # elif character == "carbide":
+    #     chara1 = "炭化物面積率1"
+    #     chara2 = "炭化物面積率2"
+    # else:
+    #     chara1 = chara2 = chara2column[character]
+ 
     i = graph_index
 
-    chara1list = df[chara1].values[start_end_index[i][0]:start_end_index[i][1] + 1].tolist()
-    chara2list = df[chara2].values[start_end_index[i][0]:start_end_index[i][1] + 1].tolist()
+    charalist = []
+
+    for col in column:
+        charalist.append(df[col].values[start_end_index[i][0]:start_end_index[i][1] + 1].tolist())
     mv = df["電圧出力"].values[start_end_index[i][0]:start_end_index[i][1] + 1].tolist()
 
     # 加熱開始時間との差を取り，経過時間を計算
@@ -42,7 +51,7 @@ def singlecurve(path, graph_index, character="temperature"):
     time = time.dt.total_seconds()
     time = time.tolist()
 
-    return chara1list, chara2list, mv, time
+    return time, mv, charalist
 
 
 def get_characteristic_data(path, character, startsec=0, endsec=30, refresh=False):
@@ -56,31 +65,30 @@ def get_characteristic_data(path, character, startsec=0, endsec=30, refresh=Fals
 
     df, start_end_index = Preprocess(path).getdata(refresh)
 
-    from datetime import datetime as dt
-    start = dt.now()
-    
+    charalist = []
 
     # 各ヒートでの特性値をリストに抽出
+    # 配列2つをcharalistという配列に入れる
     if character == "carbide":
         datetime = [df["日時"][x[1]] for x in iter(start_end_index)]
-        chara1list = [df["炭化物面積率1"][x[1]] for x in iter(start_end_index)]
-        chara2list = [df["炭化物面積率2"][x[1]] for x in iter(start_end_index)]
+        charalist.append([df["炭化物面積率1"][x[1]] for x in iter(start_end_index)])
+        charalist.append([df["炭化物面積率2"][x[1]] for x in iter(start_end_index)])
 
     elif character == "temperature" or character == "tempdiff":
         arr = df.loc[:,["日時", "ワーク外側温度", "ワーク内側温度"]].values
         datetime = [arr[x[1],0] for x in iter(start_end_index)]
-        chara1list = [arr[x[0]:x[1]+1, 1].max() for x in iter(start_end_index)]
-        chara2list = [arr[x[0]:x[1]+1, 2].max() for x in iter(start_end_index)]
+        charalist.append([arr[x[0]:x[1]+1, 1].max() for x in iter(start_end_index)])
+        charalist.append([arr[x[0]:x[1]+1, 2].max() for x in iter(start_end_index)])
 
     else:
         column = chara2column[character]
 
         arr = df.loc[:,["日時", column]].values
         datetime = [arr[x[1],0] for x in iter(start_end_index)]
-        # chara1list = [arr[x[0]+30:x[0]+250, 1].sum()/220 for x in iter(start_end_index)]
-        # chara2list = [arr[x[0]+30:x[0]+250, 1].sum()/220 for x in iter(start_end_index)]
-        chara1list = []
-        
+
+        #temperature や carbideとの整合性を保つために
+        # 配列1つが配列charlistの中に入っている状態にしたい
+        charalist.append([])
         for i in iter(start_end_index):
             for j in range(*i):
                 time = (arr[j, 0] - arr[i[0], 0]).total_seconds()
@@ -88,38 +96,18 @@ def get_characteristic_data(path, character, startsec=0, endsec=30, refresh=Fals
                     startidx = j
                 if time == endsec:
                     endidx = j
-                    chara1list.append(arr[startidx:endidx+1, 1].sum()/(endidx - startidx + 1))
+                    charalist[0].append(arr[startidx:endidx+1, 1].sum()/(endidx - startidx + 1))
                     break
         
-        chara2list = chara1list
-
-
-
-    print(dt.now()-start)
-
-    # 異常値除去しやすいようにDataFrameにまとめる
-    df2 = pd.DataFrame({"日時": datetime,
-                        "特性値1": chara1list,
-                        "特性値2": chara2list})
-
-
-    # tempdiffは1系列のデータしか必要ないが，この後のif文を少なくするために特性値1, 2両方に 同じデータを入れている．
-    # 両方ともプロットされるが，完全に重なるので見た目上問題ない．
-    if character == "tempdiff":
-        df2["特性値1"] = df2["特性値1"] - df2["特性値2"]
-        df2["特性値2"] = df2["特性値1"]
-
-    return df2
+    return [datetime, *charalist]
 
 
 
 if __name__ == "__main__":
     # path = "Z:/01_研究テーマ/14_三重IH改善/08_生産チャート/202106_GRW5102B0"
     # singlecurve(path, 2)
-    list = [[0,1],[2,3]]
-    arr = np.array(list)
-    for i in iter(list):
-        print(i[0])
+    list = "aaa"
+    print(type(list))
 
 
 
