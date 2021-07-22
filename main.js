@@ -6,7 +6,7 @@ var layout = {
     ticks: 'inside',
     linewidth: 1,
     mirror: true,
-    title: '実施日時'
+    title: '実施日時',
   },
   yaxis: {
     tickmode: 'auto',
@@ -18,7 +18,7 @@ var layout = {
   yaxis2: {
     overlaying: 'y',
     side: 'right',
-    autorange: 'reversed'
+    autorange: 'reversed',
     }
   // width: 600
 };
@@ -30,7 +30,8 @@ var layout2 = {
     ticks: 'inside',
     linewidth: 1,
     mirror: true,
-    title: '加熱時間 (s)'},
+    title: '加熱時間 (s)',
+  },
   yaxis: {
     tickmode: 'auto',
     ticks: 'inside',
@@ -102,50 +103,6 @@ var app = new Vue({
       {text: '2021/7 GRW5102(C0)', value: 'Z:/01_研究テーマ/14_三重IH改善/08_生産チャート/202107_GRW5102C0/'}
     ],
     loading: false,
-    
-    // outer: {
-    //   x: null,
-    //   y: null,
-    //   text : null,
-    //   name: 'outer',
-    //   mode: 'markers',
-    //   type: 'scatter',
-    //   marker: { size: 6 }
-    // },
-    // inner: {
-    //   x: null,
-    //   y: null,
-    //   text : null,
-    //   name: 'inner',
-    //   mode: 'markers',
-    //   type: 'scatter',
-    //   marker: { size: 6 }
-    // },
-    single1: {
-      x: null,
-      y: null,
-      name: 'outer',
-      mode: 'lines',
-      type: 'scatter',
-      marker: { size: 6 }
-    },
-    single2: {
-      x: null,
-      y: null,
-      name: 'inner',
-      mode: 'lines',
-      type: 'scatter',
-      marker: { size: 6 }
-    },
-    single3: {
-      x: null,
-      y: null,
-      name: 'MV',
-      yaxis: 'y2',
-      mode: 'lines',
-      type: 'scatter',
-      marker: { size: 6 }
-    }
   },
   methods: {
     historyplot: function(refresh){
@@ -158,7 +115,7 @@ var app = new Vue({
           // オブジェクトの要素数を取得
           // 日時，id は必ず含まれており，それ以外が特性値
           // このため，特性値の数は num-2
-          num = Object.keys(response.data).length,
+          num = Object.keys(response.data).length;
           x = response.data.datetime;
           id = response.data.id;
 
@@ -178,24 +135,32 @@ var app = new Vue({
             app.id = parseInt(data.points[0].text);
           });
         })
+      this.ambCheck()
+    },
+    ambCheck: function(){
+
+      // ambファイルの選択をリセット
+      this.ambforplot = null;
       axios
         .get(`http://10.112.120.156:5000/ambcheck?path=${this.path}`)
         .then(response => {
-          this.ambfiles = response.data.file
+          this.ambfiles = response.data.file;
         })
-      },
+    },
     amb: function(){
+      this.loading = true;
       axios
         .get(`http://10.112.120.156:5000/ambtemp?path=${this.path}&filename=${this.ambforplot}`)
         .then(response => {
-          x = response.data.time,
-          yin = response.data.in,
-          yout = response.data.out,
-          traceIn = {x:x, y:yin, yaxis:'y2', name: 'in', mode:'lines', type:'scatter', line:{color:'blue'}, opacity: 0.5},
-          traceOut = {x:x, y:yout, yaxis:'y2', name: 'out', mode:'lines', type:'scatter', line:{color:'red'}, opacity: 0.5}
-          Plotly.addTraces('myDiv', [traceIn, traceOut])
+          x = response.data.time;
+          yin = response.data.in;
+          yout = response.data.out;
+          traceIn = {x:x, y:yin, yaxis:'y2', name: 'in', mode:'lines', type:'scatter', line:{color:'blue'}, opacity: 0.5};
+          traceOut = {x:x, y:yout, yaxis:'y2', name: 'out', mode:'lines', type:'scatter', line:{color:'red'}, opacity: 0.5};
+          Plotly.addTraces('myDiv', [traceIn, traceOut]);
         })
-      },
+      this.loading = false;
+    },
     trigger: function(event) {
       if (event.keyCode === 13){
         this.historyplot(0)
@@ -232,11 +197,10 @@ var app = new Vue({
           .get(`http://10.112.120.156:5000/singleplot?path=${this.path}&character=${this.selectedCharacter}&id=${this.id}`)
           .then(response => {
 
-
           // オブジェクトの要素数を取得
           // 日時，id は必ず含まれており，それ以外が特性値
           // このため，特性値の数は num-2
-          num = Object.keys(response.data).length,
+          num = Object.keys(response.data).length;
           x = response.data.time;
           mv = response.data.mv;
 
@@ -257,17 +221,12 @@ var app = new Vue({
           if (this.drawMV) series.push({x:x, y:mv, text:id, name:'MV',yaxis: 'y2', mode: 'lines', type: 'scatter', marker: { size: 6 }});
 
           Plotly.newPlot('singlePlot', series, layout2, config)
-
-            // this.single1.x = response.data.time,
-            // this.single1.y = response.data.data1,
-            // this.single2.y = response.data.data2,
-            // this.single2.x = this.single1.x,
-            // this.single3.x = this.single1.x,
-            // this.single3.y = response.data.mv,
-            // this.drawMV ? series = [this.single1, this.single2, this.single3] : series = [this.single1, this.single2],
-            // Plotly.newPlot('singlePlot', series, layout2, config)
-
           });
+      }
+    },
+    ambforplot:{
+      handler: function(){
+        this.amb();
       }
     }
   }

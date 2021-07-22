@@ -12,27 +12,46 @@
 
     <script src="https://cdn.plot.ly/plotly-2.1.0.min.js"></script>
     
+    <style>
+      /* 読み込み完了するまで非表示 */
+      [v-cloak] {
+        display: none;
+      }
+      [darkgray] {
+        color: #A9A9A9;
+      }
+    </style>
 
   </head>
 
   <body>
     <div id="app" class="container-fluid">
-      <div class="row">
+      <div class="row mt-2">
+
+        <!-- データ選択 -->
         <div class="col-2">
-          <select class="form-select" v-model="path">
+          <select class="form-select" v-model="path" >
             <option v-for="option in options" v-bind:value="option.value">
               {{option.text}}
             </option>
           </select>
         </div>
+
+        <!-- 特性選択 -->
         <div class="col-2">
-          <button v-on:click="historyplot(1)" name="button" class="btn btn-primary">データ更新</button>
+          <select v-if="path==null" class="form-select" v-model="selectedCharacter" disabled>
+            <option v-for="option in characterList" v-bind:value="option.value">
+              {{option.text}}
+            </option>
+          </select>
+          <select v-else class="form-select" v-model="selectedCharacter" v-cloak>
+            <option v-for="option in characterList" v-bind:value="option.value">
+              {{option.text}}
+            </option>
+          </select>
         </div>
-        <div class="col-auto">
-          <div class="spinner-border text-primary" role="status" v-if="loading" >
-            <span class="visually-hidden" >Loading...</span>
-          </div>
-        </div>
+
+        <!-- 冷却水温度ファイル選択 -->
         <div class="col-2">
           <select class="form-select" v-model="ambforplot">
             <option v-for="ambfile in ambfiles" v-bind:value="ambfile">
@@ -40,25 +59,42 @@
             </option>
           </select>
         </div>
-        <div class="col-2">
+
+
+        <!-- <div class="col-2">
           <button v-on:click="amb" name="button" class="btn btn-primary">冷却水温度</button>
+        </div> -->
+
+        <!-- スピナー -->
+        <div class="col-1">
+          <div class="spinner-border text-primary" role="status" v-if="loading" v-cloak>
+            <span class="visually-hidden" >Loading...</span>
+          </div>
         </div>
       
       </div>
 
-      <div class="row align-items-center">
-        <div class="col-2">
-          <select v-if="path==null" class="form-select" v-model="selectedCharacter" disabled>
-            <option v-for="option in characterList" v-bind:value="option.value">
-              {{option.text}}
-            </option>
-          </select>
-          <select v-else class="form-select" v-model="selectedCharacter">
-            <option v-for="option in characterList" v-bind:value="option.value">
-              {{option.text}}
-            </option>
-          </select>
+      <!-- 2行目 -->
+      <div class="row align-items-center mt-2">
+        <div class="d-grid col-2">
+          <button v-on:click="historyplot(1)" name="button" class="btn btn-primary">データ更新</button>
         </div>
+
+        <!-- 平均化時間 -->
+        <div class="col-2">
+          <div v-if="isPower" class="input-group" v-cloak>
+            <span class="input-group-text">平均化時間</span>
+            <input type="text" aria-label="First name" class="form-control" v-model="startSec" v-on:keyup="trigger">
+            <input type="text" aria-label="Last name" class="form-control" v-model="endSec" v-on:keyup="trigger">
+          </div>
+          <div v-else class="input-group">
+            <span class="input-group-text" darkgray>平均化時間</span>
+            <input type="text" aria-label="First name" class="form-control" v-model="startSec" v-on:keyup="trigger" disabled darkgray>
+            <input type="text" aria-label="Last name" class="form-control" v-model="endSec" v-on:keyup="trigger" disabled darkgray>
+          </div>
+        </div>
+
+        <!-- MVの描画チェック -->
         <div class="col-2">
           <div class="form-check align-item-centers">
             <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault" v-model="drawMV">
@@ -67,18 +103,9 @@
             </label>
           </div>
         </div>
-        <div class="col-2">
-          <div v-if="isPower" class="input-group">
-            <span class="input-group-text">平均化時間</span>
-            <input type="text" aria-label="First name" class="form-control" v-model="startSec" v-on:keyup="trigger">
-            <input type="text" aria-label="Last name" class="form-control" v-model="endSec" v-on:keyup="trigger">
-          </div>
-          <div v-else class="input-group">
-            <span class="input-group-text">平均化時間</span>
-            <input type="text" aria-label="First name" class="form-control" v-model="startSec" v-on:keyup="trigger" disabled>
-            <input type="text" aria-label="Last name" class="form-control" v-model="endSec" v-on:keyup="trigger" disabled>
-          </div>
-        </div>
+
+
+
       </div>
       
     </div>  
