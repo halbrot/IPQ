@@ -70,9 +70,10 @@ def get_characteristic_data(path, character, startsec=0, endsec=30, refresh=Fals
     # 各ヒートでの特性値をリストに抽出
     # 配列2つをcharalistという配列に入れる
     if character == "carbide":
-        datetime = [df["日時"][x[1]] for x in iter(start_end_index)]
-        charalist.append([df["炭化物面積率1"][x[1]] for x in iter(start_end_index)])
-        charalist.append([df["炭化物面積率2"][x[1]] for x in iter(start_end_index)])
+        arr = df.loc[:,["日時", "炭化物面積率1", "炭化物面積率2"]].values
+        datetime = [arr[x[1],0] for x in iter(start_end_index)]
+        charalist.append([arr[x[1],1] for x in iter(start_end_index)])
+        charalist.append([arr[x[1],2] for x in iter(start_end_index)])
 
     elif character == "temperature" or character == "tempdiff":
         arr = df.loc[:,["日時", "ワーク外側温度", "ワーク内側温度"]].values

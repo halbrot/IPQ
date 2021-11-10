@@ -25,7 +25,7 @@
   </head>
 
   <body>
-    <div id="app" class="container-fluid">
+    <div id="app" class="container-fluid" v-cloak>
       <div class="row mt-2">
 
         <!-- データ選択 -->
@@ -44,7 +44,7 @@
               {{option.text}}
             </option>
           </select>
-          <select v-else class="form-select" v-model="selectedCharacter" v-cloak>
+          <select v-else class="form-select" v-model="selectedCharacter">
             <option v-for="option in characterList" v-bind:value="option.value">
               {{option.text}}
             </option>
@@ -67,7 +67,7 @@
 
         <!-- スピナー -->
         <div class="col-1">
-          <div class="spinner-border text-primary" role="status" v-if="loading" v-cloak>
+          <div class="spinner-border text-primary" role="status" v-if="loading">
             <span class="visually-hidden" >Loading...</span>
           </div>
         </div>
@@ -82,7 +82,7 @@
 
         <!-- 平均化時間 -->
         <div class="col-2">
-          <div v-if="isPower" class="input-group" v-cloak>
+          <div v-if="isPower" class="input-group">
             <span class="input-group-text">平均化時間</span>
             <input type="text" aria-label="First name" class="form-control" v-model="startSec" v-on:keyup="trigger">
             <input type="text" aria-label="Last name" class="form-control" v-model="endSec" v-on:keyup="trigger">
