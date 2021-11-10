@@ -5,7 +5,6 @@ import numpy as np
 import pandas as pd
 import datetime
 from preprocess import Preprocess
-from numba import jit
 
 
 chara2column = {

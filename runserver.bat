@@ -1,1 +1,1 @@
-activate base && python run.py
+pipenv run python run.py
