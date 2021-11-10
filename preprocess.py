@@ -28,7 +28,7 @@ class Preprocess:
         
         i = 0
         for file in files:
-            new_array = pd.read_csv(file, sep=',', skiprows=47)
+            new_array = pd.read_csv(file, sep=',', skiprows=47, encoding='shift-jis')
             if i == 0:
                 concat_array = new_array.copy()
             else:

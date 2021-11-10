@@ -1,3 +1,6 @@
+let endpoint = "http://10.112.120.156:5000"
+
+
 let fontsize = 18;
 let axisSetting = {
   tickmode: 'auto',
@@ -102,7 +105,11 @@ var app = new Vue({
       {text: '2021/6 GRW5102(C0)', value: 'Z:/01_研究テーマ/14_三重IH改善/08_生産チャート/202106_GRW5102C0/'},
       {text: '2021/6 GRW5102(B0)', value: 'Z:/01_研究テーマ/14_三重IH改善/08_生産チャート/202106_GRW5102B0/'},
       {text: '2021/7 GRW5102(B0)', value: 'Z:/01_研究テーマ/14_三重IH改善/08_生産チャート/202107_GRW5102B0/'},
-      {text: '2021/7 GRW5102(C0)', value: 'Z:/01_研究テーマ/14_三重IH改善/08_生産チャート/202107_GRW5102C0/'}
+      {text: '2021/7 GRW5102(C0)', value: 'Z:/01_研究テーマ/14_三重IH改善/08_生産チャート/202107_GRW5102C0/'},
+      {text: '2021/7 unknown', value: 'Z:/01_研究テーマ/14_三重IH改善/08_生産チャート/202107_mikakunin/'},
+      {text: '2021/9', value: 'Z:/01_研究テーマ/14_三重IH改善/08_生産チャート/202109/'},
+      {text: '2021/10', value: 'Z:/01_研究テーマ/14_三重IH改善/08_生産チャート/202110/'},
+      {text: '2021/11', value: 'Z:/01_研究テーマ/14_三重IH改善/08_生産チャート/202111/'},
     ]
   },
   methods: {
@@ -110,7 +117,7 @@ var app = new Vue({
       //refresh: 0;再読み込みなし，1；CSVファイルを再読み込み
       this.loading = true;
       axios
-        .get(`http://10.112.120.156:5000/getdata?path=${this.path}&character=${this.selectedCharacter}&startsec=${this.startSec}&endsec=${this.endSec}&refresh=${refresh}`)
+        .get(`${endpoint}/getdata?path=${this.path}&character=${this.selectedCharacter}&startsec=${this.startSec}&endsec=${this.endSec}&refresh=${refresh}`)
         .then((response) => {
 
           // オブジェクトの要素数を取得
@@ -141,7 +148,7 @@ var app = new Vue({
     },
     singlePlot: function(){
       axios
-        .get(`http://10.112.120.156:5000/singleplot?path=${this.path}&character=${this.selectedCharacter}&id=${this.id}`)
+        .get(`${endpoint}/singleplot?path=${this.path}&character=${this.selectedCharacter}&id=${this.id}`)
         .then(response => {
 
         // オブジェクトの要素数を取得
@@ -175,7 +182,7 @@ var app = new Vue({
       // ambファイルの選択をリセット
       this.ambforplot = null;
       axios
-        .get(`http://10.112.120.156:5000/ambcheck?path=${this.path}`)
+        .get(`${endpoint}/ambcheck?path=${this.path}`)
         .then(response => {
           this.ambfiles = response.data.file;
         })
@@ -183,7 +190,7 @@ var app = new Vue({
     amb: function(){
       this.loading = true;
       axios
-        .get(`http://10.112.120.156:5000/ambtemp?path=${this.path}&filename=${this.ambforplot}`)
+        .get(`${endpoint}/ambtemp?path=${this.path}&filename=${this.ambforplot}`)
         .then(response => {
           x = response.data.time;
           yin = response.data.in;
