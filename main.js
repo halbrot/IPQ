@@ -1,4 +1,4 @@
-let endpoint = "http://10.112.120.156:5000"
+let endpoint = "http://10.112.120.36:5000"
 
 
 let fontsize = 18;
@@ -90,7 +90,8 @@ var app = new Vue({
       {text: 'IHヒータ出力電力値', value: 'power'},
       {text: 'IHヒータ電圧値', value: 'voltageAC'},
       {text: 'IHヒータ直流電圧値', value: 'voltageDC'},
-      {text: 'MV (電圧出力)', value: 'MV'}
+      {text: 'MV (電圧出力)', value: 'MV'},
+      {text: '加熱時間', value: 'heatduration'}
 
     ],
     options: [

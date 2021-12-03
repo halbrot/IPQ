@@ -22,6 +22,10 @@ def singlecurve(path, graph_index, character="temperature"):
     
     df, start_end_index = Preprocess(path).getdata()
 
+    # 加熱時間(heatduration)はsinglecurveを作成できないので，温度で代用
+    if character == 'heatduration':
+        character = 'temperature'
+        
     column = chara2column[character]
     if type(column) is str:
         column = [column]
@@ -60,6 +64,7 @@ def get_characteristic_data(path, character, startsec=0, endsec=30, refresh=Fals
                frequency → 開始，終了時周波数
                power → 開始，終了時電力
                tempdiff → ワーク外側最高温度 - ワーク内側最高温度
+               heatduration → 加熱時間
     """
 
     df, start_end_index = Preprocess(path).getdata(refresh)
@@ -79,6 +84,15 @@ def get_characteristic_data(path, character, startsec=0, endsec=30, refresh=Fals
         datetime = [arr[x[1],0] for x in iter(start_end_index)]
         charalist.append([arr[x[0]:x[1]+1, 1].max() for x in iter(start_end_index)])
         charalist.append([arr[x[0]:x[1]+1, 2].max() for x in iter(start_end_index)])
+
+    elif character == "heatduration":
+        arr = df.loc[:,"日時"].values
+        datetime = [arr[x[1]] for x in iter(start_end_index)]
+        heatduration = [(arr[x[1]]-arr[x[0]])/np.timedelta64(1, 's') for x in iter(start_end_index)]
+        # time = df['日時'][start_end_index[i][0]:start_end_index[i][1] + 1] - df['日時'][start_end_index[i][0]]
+        # heatduration = heatduration.dt.total_seconds()
+
+        charalist.append(heatduration)
 
     else:
         column = chara2column[character]
